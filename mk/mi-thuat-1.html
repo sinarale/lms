@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <title>Mĩ Thuật 1 — MK</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    [x-cloak] { display: none !important; }
+    .lms-content img { max-width: 100%; height: auto; border-radius: 0.5rem; }
+    .lms-content iframe { max-width: 100%; }
+    .lms-content a { color: #4f46e5; text-decoration: underline; }
+    .lms-content p { margin: 0.5rem 0; }
+    .lms-content ul, .lms-content ol { margin: 0.5rem 0 0.5rem 1.5rem; list-style: revert; }
+    .lms-content table { border-collapse: collapse; margin: 0.5rem 0; }
+    .lms-content td, .lms-content th { border: 1px solid #e2e8f0; padding: 0.375rem 0.625rem; }
+    .lms-content h1, .lms-content h2, .lms-content h3, .lms-content h4 { font-weight: 700; margin: 0.75rem 0 0.375rem; }
+  </style>
+  <script>
+    // Tìm kiếm không phân biệt dấu tiếng Việt
+    function vnorm(s) {
+      return (s || '').toLowerCase().normalize('NFD')
+        .replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
+    }
+    function typeOk(el, types) {
+      return !types.length || types.includes(el.dataset.type);
+    }
+    function itemMatches(el, q, types) {
+      return typeOk(el, types) && (!q || vnorm(el.dataset.title).includes(vnorm(q)));
+    }
+    // Đề mục (SubHeader) chỉ hiện khi còn ít nhất 1 mục thuộc nó đang hiển thị
+    function headingMatches(el, q, types) {
+      if (!q && !types.length) return true;
+      const box = el.closest('[data-module]');
+      if (!box) return true;
+      return Array.from(box.querySelectorAll('[data-sec="' + el.dataset.sec + '"][data-item]'))
+        .some(c => itemMatches(c, q, types));
+    }
+    function moduleMatches(el, q, types) {
+      const items = Array.from(el.querySelectorAll('[data-item]'));
+      const passType = items.filter(c => typeOk(c, types));
+      if (!passType.length) return false;
+      if (!q) return true;
+      if (vnorm(el.dataset.title).includes(vnorm(q))) return true;
+      return passType.some(c => vnorm(c.dataset.title).includes(vnorm(q)));
+    }
+  </script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen"
+      x-data="{ q: '', types: [],
+                toggle(t) { this.types.includes(t) ? this.types.splice(this.types.indexOf(t), 1) : this.types.push(t) } }">
+
+  <!-- Header dính, chứa tìm kiếm + Expand/Collapse All -->
+  <header class="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 py-3">
+      <div class="flex items-center gap-3 flex-wrap">
+        <a href="../index.html" class="shrink-0 text-slate-500 hover:text-indigo-600" title="Về trang chủ">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+        <div class="min-w-0 flex-1">
+          <h1 class="text-lg font-bold text-slate-900 truncate">Mĩ Thuật 1</h1>
+          <p class="text-xs text-slate-500">MK · 1 tuần/bài · cập nhật 2026-08-25 16:40</p>
+        </div>
+      </div>
+      <div class="mt-2 flex items-center gap-2">
+        <div class="relative flex-1">
+          <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
+          </svg>
+          <input type="search" x-model="q" placeholder="Tìm bài học nhanh..."
+                 class="w-full pl-9 pr-3 py-1.5 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+        </div>
+        <button @click="$dispatch('expand-all')"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 whitespace-nowrap">
+          Mở rộng hết
+        </button>
+        <button @click="$dispatch('collapse-all')"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-200 text-slate-700 hover:bg-slate-300 whitespace-nowrap">
+          Thu gọn hết
+        </button>
+      </div>
+
+      <!-- Bộ lọc theo loại nội dung -->
+      <div class="mt-2 flex items-center gap-1.5 flex-wrap">
+        
+        <button @click="toggle('page')"
+                :class="types.includes('page') ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-300 hover:border-indigo-400'"
+                class="px-2 py-1 text-xs rounded-full border transition-colors">
+          📄 văn bản
+        </button>
+        
+        <button x-show="types.length" x-cloak @click="types = []"
+                class="px-2 py-1 text-xs text-slate-500 hover:text-indigo-600 underline">
+          Bỏ lọc
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-6 space-y-4">
+    
+    <!-- Một Tuần học / Bài học -->
+    <section x-data="{ open: true }"
+             @expand-all.window="open = true"
+             @collapse-all.window="open = false"
+             x-effect="if (q || types.length) open = true"
+             data-module data-title="Unit 1: Mỹ thuật cơ bản (13/8 - 16/10)"
+             x-show="moduleMatches($el, q, types)"
+             class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <button @click="open = !open"
+              class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50">
+        <svg class="w-5 h-5 text-indigo-500 transition-transform duration-200 shrink-0"
+             :class="open ? 'rotate-90' : ''"
+             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="font-semibold text-slate-900 flex-1">Unit 1: Mỹ thuật cơ bản (13/8 - 16/10)</span>
+        <span class="text-xs text-slate-400 shrink-0">1 mục</span>
+      </button>
+
+      <div x-show="open" x-cloak class="border-t border-slate-100 divide-y divide-slate-100">
+        
+        
+        <div data-item data-title="Lesson 1.1: Các chấm màu (13/8 - 28/8)" data-type="page" data-sec="0"
+             x-show="itemMatches($el, q, types)"
+             x-data="{ o: false }"
+             @expand-all.window="o = true" @collapse-all.window="o = false"
+             class="group">
+          <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <span class="mt-0.5 shrink-0 text-base leading-none" title="văn bản">📄</span>
+            <div class="min-w-0 flex-1">
+              
+              <!-- Văn bản nhúng: bấm để mở/đóng nội dung -->
+              <button @click="o = !o" class="w-full text-left flex items-center gap-2">
+                <span class="text-sm font-medium text-slate-800 group-hover:text-indigo-700">Lesson 1.1: Các chấm màu (13/8 - 28/8)</span>
+                <svg class="w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0"
+                     :class="o ? 'rotate-180' : ''"
+                     fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              
+
+              <div class="mt-0.5 flex items-center gap-2 flex-wrap text-xs text-slate-400">
+                <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">văn bản</span>
+                
+                
+                
+                
+                <span title="Cập nhật lần cuối tại nguồn">🕓 17/08</span>
+                
+                
+                <a href="https://lms.vinschool.edu.vn/courses/80354/pages/lesson-1-dot-1-cac-cham-mau-13-slash-8-28-slash-8" target="_blank" rel="noopener"
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                
+              </div>
+
+              
+              <div x-show="o" x-collapse x-cloak
+                   class="lms-content mt-2 mb-1 p-3 rounded-lg bg-slate-50 border border-slate-200 text-sm leading-relaxed">
+                <p><span>Chào các con, tiết Mỹ thuật tuần 1+2 thầy Quang và các con sẽ tìm hiểu về tranh tĩnh vật lọ hoa nhé!</span></p>
+<p><span><strong> Mục tiêu bài học:</strong></span></p>
+<p><span>1/ Học sinh tạo được các chấm bằng nhiều cách khác nhau.</span></p>
+<p><span>2/ Học sinh sử dụng được các chấm màu trong tạo hình và trang trí sản phẩm.</span></p>
+<p><span> <strong>Con cần chuẩn bị:</strong></span></p>
+<p><span>- Vở vẽ A4/A3, bút chì, tẩy, màu vẽ.</span></p>
+<p><span>Chúng ta cùng bắt đầu bài học nhé !</span></p>
+<p style="text-align: center;"><span style="font-size: 14pt;"><strong><span style="color: #e03e2d;">CÁC CHẤM MÀU</span></strong></span></p>
+<p><strong>Bài học "Các chấm màu" không chỉ giúp học sinh khám phá về màu sắc, mà còn phát triển khả năng tư duy sáng tạo và khéo léo trong việc sử dụng công cụ và vật liệu. Hơn nữa, bài học này còn khuyến khích trẻ nhỏ thể hiện cảm xúc và suy nghĩ thông qua nghệ thuật, giúp phát triển khả năng biểu đạt bản thân.</strong></p>
+<p><span><strong>1. Chúng ta cùng tìm hiểu về cách chấm màu qua Video sau nhé:</strong></span><strong></strong></p>
+<p><span><strong><iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" height="720" loading="lazy" src="https://www.youtube.com/embed/0PoqLPpBm1Y" title="Một số cách tạo hình với chấm/Các cách chấm màu/Chấm màu/Tranh chấm màu/@THANTHIHUE" width="1280"></iframe></strong></span></p>
+<p> </p>
+<p><span><strong>2. Các bước vẽ tranh chấm màu: </strong></span></p>
+<p><span><strong><iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" height="720" loading="lazy" src="https://www.youtube.com/embed/L5-E8zdPkkY" title="Mĩ Thuật | Vẽ Cá Voi Bằng Chấm Màu| Chơi Với Chấm| Những Chấm Tròn Thú Vị| Con Vật Dưới Đại Dương" width="1280"></iframe></strong></span><strong></strong></p>
+<p><span><strong>3. Bài tập mở rộng:</strong></span></p>
+<p><span><strong>- Ngoài việc sử dụng chấm màu để tô màu chúng ta cũng có thể sử dụng chấm màu để tạo thành hình ảnh mà chúng ta yêu thích.</strong></span></p>
+<p><span><strong><iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" height="720" loading="lazy" src="https://www.youtube.com/embed/WP61snuPPgk" title="Tranh chấm màu/Tranh con cá/ Chơi với chấm/@THANTHIHUE /#shortvideo" width="1280"></iframe></strong></span></p>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+        
+        
+        
+      </div>
+    </section>
+    
+
+  </main>
+
+  <footer class="max-w-4xl mx-auto px-4 pb-8 text-center text-xs text-slate-400">
+    Cập nhật tự động · bản lưu offline
+  </footer>
+</body>
+</html>
