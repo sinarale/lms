@@ -25,36 +25,110 @@
       return (s || '').toLowerCase().normalize('NFD')
         .replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
     }
-    // Lọc loại nội dung (OR trong nhóm) và lọc Homework (AND với nhóm trên)
-    function typeOk(el, types, hw) {
-      if (hw && el.dataset.hw !== '1') return false;
-      return !types.length || types.includes(el.dataset.type);
+    // Lọc loại nội dung (OR trong nhóm); Homework và "chưa học" nhân AND với nhóm đó
+    function typeOk(el, f) {
+      if (f.hw && el.dataset.hw !== '1') return false;
+      if (f.todo && f.done[el.dataset.pkey]) return false;
+      return !f.types.length || f.types.includes(el.dataset.type);
     }
-    function itemMatches(el, q, types, hw) {
-      return typeOk(el, types, hw) && (!q || vnorm(el.dataset.title).includes(vnorm(q)));
+    function itemMatches(el, f) {
+      return typeOk(el, f) && (!f.q || vnorm(el.dataset.title).includes(vnorm(f.q)));
     }
     // Đề mục (SubHeader) chỉ hiện khi còn ít nhất 1 mục thuộc nó đang hiển thị
-    function headingMatches(el, q, types, hw) {
-      if (!q && !types.length && !hw) return true;
+    function headingMatches(el, f) {
+      if (!f.q && !f.types.length && !f.hw && !f.todo) return true;
       const box = el.closest('[data-module]');
       if (!box) return true;
       return Array.from(box.querySelectorAll('[data-sec="' + el.dataset.sec + '"][data-item]'))
-        .some(c => itemMatches(c, q, types, hw));
+        .some(c => itemMatches(c, f));
     }
-    function moduleMatches(el, q, types, hw) {
+    function moduleMatches(el, f) {
       const items = Array.from(el.querySelectorAll('[data-item]'));
-      const pass = items.filter(c => typeOk(c, types, hw));
+      const pass = items.filter(c => typeOk(c, f));
       if (!pass.length) return false;
-      if (!q) return true;
-      if (vnorm(el.dataset.title).includes(vnorm(q))) return true;
-      return pass.some(c => vnorm(c.dataset.title).includes(vnorm(q)));
+      if (!f.q) return true;
+      if (vnorm(el.dataset.title).includes(vnorm(f.q))) return true;
+      return pass.some(c => vnorm(c.dataset.title).includes(vnorm(f.q)));
+    }
+    // Đếm số mục đã học trong một tuần/bài
+    function moduleDone(el, done) {
+      const items = Array.from(el.querySelectorAll('[data-item]'));
+      return items.filter(c => done[c.dataset.pkey]).length;
+    }
+
+    // ---- Tiến độ học tập ----------------------------------------------------
+    // Đọc/ghi qua /api/progress (Cloudflare Pages Function + Workers KV).
+    // Mã bí mật chỉ cần khi GHI, lưu trong localStorage của trình duyệt.
+    // Nếu không có backend (mở file cục bộ, hoặc bản trên GitHub Pages) thì
+    // trang vẫn xem được bình thường, chỉ tắt phần đánh dấu.
+    function progressStore() {
+      return {
+        done: {}, ready: false, online: false, saving: 0, err: '',
+        secret: localStorage.getItem('lms_key') || '',
+
+        async init() {
+          try {
+            const r = await fetch('/api/progress', { headers: { accept: 'application/json' } });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const d = await r.json();
+            this.done = Object.fromEntries(Object.keys(d.items || {}).map(k => [k, true]));
+            this.online = true;
+          } catch (e) {
+            this.online = false;   // không có backend → chế độ chỉ đọc
+          }
+          this.ready = true;
+        },
+
+        async toggle(key) {
+          if (!this.online) return;
+          if (!this.secret) { if (!(await this.askSecret())) return; }
+          const next = !this.done[key];
+          next ? (this.done[key] = true) : delete this.done[key];
+          this.saving++; this.err = '';
+          try {
+            const r = await fetch('/api/progress', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json', 'x-progress-key': this.secret },
+              body: JSON.stringify({ key, done: next }),
+            });
+            if (r.status === 401) {
+              this.secret = ''; localStorage.removeItem('lms_key');
+              throw new Error('Mã bí mật không đúng');
+            }
+            if (!r.ok) throw new Error('Không lưu được (HTTP ' + r.status + ')');
+          } catch (e) {
+            next ? delete this.done[key] : (this.done[key] = true);  // hoàn tác
+            this.err = e.message;
+            setTimeout(() => (this.err = ''), 4000);
+          } finally {
+            this.saving--;
+          }
+        },
+
+        async askSecret() {
+          const v = (prompt('Nhập mã bí mật để đánh dấu tiến độ:') || '').trim();
+          if (!v) return false;
+          try {
+            const r = await fetch('/api/progress?check=1', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json', 'x-progress-key': v },
+              body: '{}',
+            });
+            if (!r.ok) { alert('Mã không đúng.'); return false; }
+          } catch { alert('Không kết nối được máy chủ.'); return false; }
+          this.secret = v; localStorage.setItem('lms_key', v);
+          return true;
+        },
+      };
     }
   </script>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen"
-      x-data="{ q: '', types: [], hw: false,
+      x-data="{ q: '', types: [], hw: false, todo: false, p: progressStore(),
                 toggle(t) { this.types.includes(t) ? this.types.splice(this.types.indexOf(t), 1) : this.types.push(t) },
-                get filtering() { return this.types.length > 0 || this.hw } }">
+                get filtering() { return this.types.length > 0 || this.hw || this.todo },
+                get f() { return { q: this.q, types: this.types, hw: this.hw, todo: this.todo, done: this.p.done } } }"
+      x-init="p.init()">
 
   <!-- Header dính, chứa tìm kiếm + Expand/Collapse All -->
   <header class="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
@@ -117,10 +191,29 @@
           🔗 liên kết ngoài
         </button>
         
-        <button x-show="filtering" x-cloak @click="types = []; hw = false"
+        <template x-if="p.online">
+          <button @click="todo = !todo"
+                  :class="todo ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-emerald-700 border-emerald-300 hover:border-emerald-500'"
+                  class="px-2 py-1 text-xs font-medium rounded-full border transition-colors">
+            ○ Chưa học
+          </button>
+        </template>
+        <button x-show="filtering" x-cloak @click="types = []; hw = false; todo = false"
                 class="px-2 py-1 text-xs text-slate-500 hover:text-indigo-600 underline">
           Bỏ lọc
         </button>
+      </div>
+
+      <!-- Tiến độ toàn môn + trạng thái lưu -->
+      <div x-show="p.ready && p.online" x-cloak class="mt-2 flex items-center gap-2 text-xs">
+        <div class="flex-1 h-1.5 rounded-full bg-slate-200 overflow-hidden">
+          <div class="h-full bg-emerald-500 transition-all duration-300"
+               :style="'width: ' + Math.round(Object.keys(p.done).filter(k => k.startsWith('pl/79605/')).length / 9 * 100) + '%'"></div>
+        </div>
+        <span class="text-slate-500 whitespace-nowrap"
+              x-text="Object.keys(p.done).filter(k => k.startsWith('pl/79605/')).length + '/9 đã học'"></span>
+        <span x-show="p.saving" x-cloak class="text-indigo-500">đang lưu…</span>
+        <span x-show="p.err" x-cloak class="text-rose-600" x-text="p.err"></span>
       </div>
     </div>
   </header>
@@ -133,7 +226,7 @@
              @collapse-all.window="open = false"
              x-effect="if (q || filtering) open = true"
              data-module data-title="Week 2 - 1.3"
-             x-show="moduleMatches($el, q, types, hw)"
+             x-show="moduleMatches($el, f)"
              class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <button @click="open = !open"
               class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50">
@@ -143,6 +236,12 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
         <span class="font-semibold text-slate-900 flex-1">Week 2 - 1.3</span>
+        <template x-if="p.online">
+          <span class="text-xs shrink-0 px-1.5 py-0.5 rounded"
+                :class="moduleDone($el.closest('[data-module]'), p.done) === 1
+                        ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'"
+                x-text="moduleDone($el.closest('[data-module]'), p.done) + '/1'"></span>
+        </template>
         <span class="text-xs text-slate-400 shrink-0">4 mục</span>
       </button>
 
@@ -150,7 +249,7 @@
         
         
         <div data-title="Homework" data-sec="1"
-             x-show="headingMatches($el, q, types, hw)"
+             x-show="headingMatches($el, f)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           Homework
@@ -159,7 +258,7 @@
         
         
         <div data-title="Class Resources" data-sec="2"
-             x-show="headingMatches($el, q, types, hw)"
+             x-show="headingMatches($el, f)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           Class Resources
@@ -168,7 +267,7 @@
         
         
         <div data-title="Optional Activities" data-sec="3"
-             x-show="headingMatches($el, q, types, hw)"
+             x-show="headingMatches($el, f)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           Optional Activities
@@ -177,12 +276,22 @@
         
         
         <div data-item data-title="Preposition Practise" data-type="external" data-sec="3"
+             data-pkey="pl/79605/8569109"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['pl/79605/8569109'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['pl/79605/8569109']"
+                     @change="await p.toggle('pl/79605/8569109'); $el.checked = !!p.done['pl/79605/8569109']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="liên kết ngoài">🔗</span>
             <div class="min-w-0 flex-1">
               
@@ -222,7 +331,7 @@
              @collapse-all.window="open = false"
              x-effect="if (q || filtering) open = true"
              data-module data-title="Week 1 - 1.1 + 1.2"
-             x-show="moduleMatches($el, q, types, hw)"
+             x-show="moduleMatches($el, f)"
              class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <button @click="open = !open"
               class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50">
@@ -232,6 +341,12 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
         <span class="font-semibold text-slate-900 flex-1">Week 1 - 1.1 + 1.2</span>
+        <template x-if="p.online">
+          <span class="text-xs shrink-0 px-1.5 py-0.5 rounded"
+                :class="moduleDone($el.closest('[data-module]'), p.done) === 8
+                        ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'"
+                x-text="moduleDone($el.closest('[data-module]'), p.done) + '/8'"></span>
+        </template>
         <span class="text-xs text-slate-400 shrink-0">11 mục</span>
       </button>
 
@@ -239,7 +354,7 @@
         
         
         <div data-title="Homework" data-sec="1"
-             x-show="headingMatches($el, q, types, hw)"
+             x-show="headingMatches($el, f)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           Homework
@@ -248,12 +363,22 @@
         
         
         <div data-item data-title="Workbook pages 8 - 11" data-type="page" data-sec="1"
+             data-pkey="pl/79605/8338872"
              data-hw="1"
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['pl/79605/8338872'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['pl/79605/8338872']"
+                     @change="await p.toggle('pl/79605/8338872'); $el.checked = !!p.done['pl/79605/8338872']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="văn bản">📄</span>
             <div class="min-w-0 flex-1">
               
@@ -296,7 +421,7 @@
         
         
         <div data-title="Class Resources" data-sec="2"
-             x-show="headingMatches($el, q, types, hw)"
+             x-show="headingMatches($el, f)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           Class Resources
@@ -305,17 +430,27 @@
         
         
         <div data-item data-title="3. 6Ld.04 Understand, with support, most specific information and detail of short and extended talk.pptx" data-type="file" data-sec="2"
+             data-pkey="pl/79605/8306634"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['pl/79605/8306634'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['pl/79605/8306634']"
+                     @change="await p.toggle('pl/79605/8306634'); $el.checked = !!p.done['pl/79605/8306634']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-esl-5/week-1-1-1-1-2/3. 6Ld.04 Understand, with support, most specific information and detail of short and extended talk.pptx" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/pl/materials/cie-esl-5/week-1-1-1-1-2/3. 6Ld.04 Understand, with support, most specific information and detail of short and extended talk.pptx" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 3. 6Ld.04 Understand, with support, most specific information and detail of short and extended talk.pptx
               </a>
@@ -340,17 +475,27 @@
         
         
         <div data-item data-title="4. 6So.01 - Express opinions, feelings and reactions..pptx" data-type="file" data-sec="2"
+             data-pkey="pl/79605/8306635"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['pl/79605/8306635'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['pl/79605/8306635']"
+                     @change="await p.toggle('pl/79605/8306635'); $el.checked = !!p.done['pl/79605/8306635']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-esl-5/week-1-1-1-1-2/4. 6So.01 - Express opinions, feelings and reactions..pptx" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/pl/materials/cie-esl-5/week-1-1-1-1-2/4. 6So.01 - Express opinions, feelings and reactions..pptx" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 4. 6So.01 - Express opinions, feelings and reactions..pptx
               </a>
@@ -375,17 +520,27 @@
         
         
         <div data-item data-title="5-6. 6Ug.07 – Use present perfect forms to express recent, indefinite and unfinished past..pptx" data-type="file" data-sec="2"
+             data-pkey="pl/79605/8306636"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['pl/79605/8306636'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['pl/79605/8306636']"
+                     @change="await p.toggle('pl/79605/8306636'); $el.checked = !!p.done['pl/79605/8306636']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-esl-5/week-1-1-1-1-2/5-6. 6Ug.07 – Use present perfect forms to express recent, indefinite and unfinished past..pptx" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/pl/materials/cie-esl-5/week-1-1-1-1-2/5-6. 6Ug.07 – Use present perfect forms to express recent, indefinite and unfinished past..pptx" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 5-6. 6Ug.07 – Use present perfect forms to express recent, indefinite and unfinished past..pptx
               </a>
@@ -410,17 +565,27 @@
         
         
         <div data-item data-title="7. 6Rd.03 - Understand, with support, most of the detail of an argument in short and extended texts..pptx" data-type="file" data-sec="2"
+             data-pkey="pl/79605/8306637"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['pl/79605/8306637'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['pl/79605/8306637']"
+                     @change="await p.toggle('pl/79605/8306637'); $el.checked = !!p.done['pl/79605/8306637']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-esl-5/week-1-1-1-1-2/7. 6Rd.03 - Understand, with support, most of the detail of an argument in short and extended texts..pptx" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/pl/materials/cie-esl-5/week-1-1-1-1-2/7. 6Rd.03 - Understand, with support, most of the detail of an argument in short and extended texts..pptx" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 7. 6Rd.03 - Understand, with support, most of the detail of an argument in short and extended texts..pptx
               </a>
@@ -445,7 +610,7 @@
         
         
         <div data-title="Optional Activities" data-sec="3"
-             x-show="headingMatches($el, q, types, hw)"
+             x-show="headingMatches($el, f)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           Optional Activities
@@ -454,17 +619,27 @@
         
         
         <div data-item data-title="Present Perfect Tense practice.pdf" data-type="file" data-sec="3"
+             data-pkey="pl/79605/8306641"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['pl/79605/8306641'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['pl/79605/8306641']"
+                     @change="await p.toggle('pl/79605/8306641'); $el.checked = !!p.done['pl/79605/8306641']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-esl-5/week-1-1-1-1-2/Present Perfect Tense practice.pdf" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/pl/materials/cie-esl-5/week-1-1-1-1-2/Present Perfect Tense practice.pdf" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 Present Perfect Tense practice.pdf
               </a>
@@ -489,17 +664,27 @@
         
         
         <div data-item data-title="Positive Present Perfect Tense Practise.pdf" data-type="file" data-sec="3"
+             data-pkey="pl/79605/8306745"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['pl/79605/8306745'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['pl/79605/8306745']"
+                     @change="await p.toggle('pl/79605/8306745'); $el.checked = !!p.done['pl/79605/8306745']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-esl-5/week-1-1-1-1-2/Positive Present Perfect Tense Practise.pdf" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/pl/materials/cie-esl-5/week-1-1-1-1-2/Positive Present Perfect Tense Practise.pdf" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 Positive Present Perfect Tense Practise.pdf
               </a>
@@ -524,17 +709,27 @@
         
         
         <div data-item data-title="Negative Present Perfect Tense Practise.pdf" data-type="file" data-sec="3"
+             data-pkey="pl/79605/8306746"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['pl/79605/8306746'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['pl/79605/8306746']"
+                     @change="await p.toggle('pl/79605/8306746'); $el.checked = !!p.done['pl/79605/8306746']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-esl-5/week-1-1-1-1-2/Negative Present Perfect Tense Practise.pdf" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/pl/materials/cie-esl-5/week-1-1-1-1-2/Negative Present Perfect Tense Practise.pdf" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 Negative Present Perfect Tense Practise.pdf
               </a>

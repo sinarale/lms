@@ -25,36 +25,110 @@
       return (s || '').toLowerCase().normalize('NFD')
         .replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
     }
-    // Lọc loại nội dung (OR trong nhóm) và lọc Homework (AND với nhóm trên)
-    function typeOk(el, types, hw) {
-      if (hw && el.dataset.hw !== '1') return false;
-      return !types.length || types.includes(el.dataset.type);
+    // Lọc loại nội dung (OR trong nhóm); Homework và "chưa học" nhân AND với nhóm đó
+    function typeOk(el, f) {
+      if (f.hw && el.dataset.hw !== '1') return false;
+      if (f.todo && f.done[el.dataset.pkey]) return false;
+      return !f.types.length || f.types.includes(el.dataset.type);
     }
-    function itemMatches(el, q, types, hw) {
-      return typeOk(el, types, hw) && (!q || vnorm(el.dataset.title).includes(vnorm(q)));
+    function itemMatches(el, f) {
+      return typeOk(el, f) && (!f.q || vnorm(el.dataset.title).includes(vnorm(f.q)));
     }
     // Đề mục (SubHeader) chỉ hiện khi còn ít nhất 1 mục thuộc nó đang hiển thị
-    function headingMatches(el, q, types, hw) {
-      if (!q && !types.length && !hw) return true;
+    function headingMatches(el, f) {
+      if (!f.q && !f.types.length && !f.hw && !f.todo) return true;
       const box = el.closest('[data-module]');
       if (!box) return true;
       return Array.from(box.querySelectorAll('[data-sec="' + el.dataset.sec + '"][data-item]'))
-        .some(c => itemMatches(c, q, types, hw));
+        .some(c => itemMatches(c, f));
     }
-    function moduleMatches(el, q, types, hw) {
+    function moduleMatches(el, f) {
       const items = Array.from(el.querySelectorAll('[data-item]'));
-      const pass = items.filter(c => typeOk(c, types, hw));
+      const pass = items.filter(c => typeOk(c, f));
       if (!pass.length) return false;
-      if (!q) return true;
-      if (vnorm(el.dataset.title).includes(vnorm(q))) return true;
-      return pass.some(c => vnorm(c.dataset.title).includes(vnorm(q)));
+      if (!f.q) return true;
+      if (vnorm(el.dataset.title).includes(vnorm(f.q))) return true;
+      return pass.some(c => vnorm(c.dataset.title).includes(vnorm(f.q)));
+    }
+    // Đếm số mục đã học trong một tuần/bài
+    function moduleDone(el, done) {
+      const items = Array.from(el.querySelectorAll('[data-item]'));
+      return items.filter(c => done[c.dataset.pkey]).length;
+    }
+
+    // ---- Tiến độ học tập ----------------------------------------------------
+    // Đọc/ghi qua /api/progress (Cloudflare Pages Function + Workers KV).
+    // Mã bí mật chỉ cần khi GHI, lưu trong localStorage của trình duyệt.
+    // Nếu không có backend (mở file cục bộ, hoặc bản trên GitHub Pages) thì
+    // trang vẫn xem được bình thường, chỉ tắt phần đánh dấu.
+    function progressStore() {
+      return {
+        done: {}, ready: false, online: false, saving: 0, err: '',
+        secret: localStorage.getItem('lms_key') || '',
+
+        async init() {
+          try {
+            const r = await fetch('/api/progress', { headers: { accept: 'application/json' } });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const d = await r.json();
+            this.done = Object.fromEntries(Object.keys(d.items || {}).map(k => [k, true]));
+            this.online = true;
+          } catch (e) {
+            this.online = false;   // không có backend → chế độ chỉ đọc
+          }
+          this.ready = true;
+        },
+
+        async toggle(key) {
+          if (!this.online) return;
+          if (!this.secret) { if (!(await this.askSecret())) return; }
+          const next = !this.done[key];
+          next ? (this.done[key] = true) : delete this.done[key];
+          this.saving++; this.err = '';
+          try {
+            const r = await fetch('/api/progress', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json', 'x-progress-key': this.secret },
+              body: JSON.stringify({ key, done: next }),
+            });
+            if (r.status === 401) {
+              this.secret = ''; localStorage.removeItem('lms_key');
+              throw new Error('Mã bí mật không đúng');
+            }
+            if (!r.ok) throw new Error('Không lưu được (HTTP ' + r.status + ')');
+          } catch (e) {
+            next ? delete this.done[key] : (this.done[key] = true);  // hoàn tác
+            this.err = e.message;
+            setTimeout(() => (this.err = ''), 4000);
+          } finally {
+            this.saving--;
+          }
+        },
+
+        async askSecret() {
+          const v = (prompt('Nhập mã bí mật để đánh dấu tiến độ:') || '').trim();
+          if (!v) return false;
+          try {
+            const r = await fetch('/api/progress?check=1', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json', 'x-progress-key': v },
+              body: '{}',
+            });
+            if (!r.ok) { alert('Mã không đúng.'); return false; }
+          } catch { alert('Không kết nối được máy chủ.'); return false; }
+          this.secret = v; localStorage.setItem('lms_key', v);
+          return true;
+        },
+      };
     }
   </script>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen"
-      x-data="{ q: '', types: [], hw: false,
+      x-data="{ q: '', types: [], hw: false, todo: false, p: progressStore(),
                 toggle(t) { this.types.includes(t) ? this.types.splice(this.types.indexOf(t), 1) : this.types.push(t) },
-                get filtering() { return this.types.length > 0 || this.hw } }">
+                get filtering() { return this.types.length > 0 || this.hw || this.todo },
+                get f() { return { q: this.q, types: this.types, hw: this.hw, todo: this.todo, done: this.p.done } } }"
+      x-init="p.init()">
 
   <!-- Header dính, chứa tìm kiếm + Expand/Collapse All -->
   <header class="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
@@ -117,10 +191,29 @@
           🔗 liên kết ngoài
         </button>
         
-        <button x-show="filtering" x-cloak @click="types = []; hw = false"
+        <template x-if="p.online">
+          <button @click="todo = !todo"
+                  :class="todo ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-emerald-700 border-emerald-300 hover:border-emerald-500'"
+                  class="px-2 py-1 text-xs font-medium rounded-full border transition-colors">
+            ○ Chưa học
+          </button>
+        </template>
+        <button x-show="filtering" x-cloak @click="types = []; hw = false; todo = false"
                 class="px-2 py-1 text-xs text-slate-500 hover:text-indigo-600 underline">
           Bỏ lọc
         </button>
+      </div>
+
+      <!-- Tiến độ toàn môn + trạng thái lưu -->
+      <div x-show="p.ready && p.online" x-cloak class="mt-2 flex items-center gap-2 text-xs">
+        <div class="flex-1 h-1.5 rounded-full bg-slate-200 overflow-hidden">
+          <div class="h-full bg-emerald-500 transition-all duration-300"
+               :style="'width: ' + Math.round(Object.keys(p.done).filter(k => k.startsWith('mk/80196/')).length / 13 * 100) + '%'"></div>
+        </div>
+        <span class="text-slate-500 whitespace-nowrap"
+              x-text="Object.keys(p.done).filter(k => k.startsWith('mk/80196/')).length + '/13 đã học'"></span>
+        <span x-show="p.saving" x-cloak class="text-indigo-500">đang lưu…</span>
+        <span x-show="p.err" x-cloak class="text-rose-600" x-text="p.err"></span>
       </div>
     </div>
   </header>
@@ -133,7 +226,7 @@
              @collapse-all.window="open = false"
              x-effect="if (q || filtering) open = true"
              data-module data-title="Week 1: 4.1 Comparing Animals (17/08/2026-21/08/2026)"
-             x-show="moduleMatches($el, q, types, hw)"
+             x-show="moduleMatches($el, f)"
              class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <button @click="open = !open"
               class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50">
@@ -143,6 +236,12 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
         <span class="font-semibold text-slate-900 flex-1">Week 1: 4.1 Comparing Animals (17/08/2026-21/08/2026)</span>
+        <template x-if="p.online">
+          <span class="text-xs shrink-0 px-1.5 py-0.5 rounded"
+                :class="moduleDone($el.closest('[data-module]'), p.done) === 11
+                        ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'"
+                x-text="moduleDone($el.closest('[data-module]'), p.done) + '/11'"></span>
+        </template>
         <span class="text-xs text-slate-400 shrink-0">13 mục</span>
       </button>
 
@@ -150,12 +249,22 @@
         
         
         <div data-item data-title="Lesson Resources" data-type="page" data-sec="0"
+             data-pkey="mk/80196/8463423"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80196/8463423'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80196/8463423']"
+                     @change="await p.toggle('mk/80196/8463423'); $el.checked = !!p.done['mk/80196/8463423']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="văn bản">📄</span>
             <div class="min-w-0 flex-1">
               
@@ -191,17 +300,27 @@
         
         
         <div data-item data-title="G1_W1_4.1 Comparing Animals.pdf" data-type="file" data-sec="0"
+             data-pkey="mk/80196/8463436"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80196/8463436'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 3.5rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80196/8463436']"
+                     @change="await p.toggle('mk/80196/8463436'); $el.checked = !!p.done['mk/80196/8463436']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-science-1/week-1-4-1-comparing-animals-17-08-2026-21-08-2026/G1_W1_4.1 Comparing Animals.pdf" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/mk/materials/cie-science-1/week-1-4-1-comparing-animals-17-08-2026-21-08-2026/G1_W1_4.1 Comparing Animals.pdf" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 G1_W1_4.1 Comparing Animals.pdf
               </a>
@@ -226,17 +345,27 @@
         
         
         <div data-item data-title="Mammals Poster.png" data-type="file" data-sec="0"
+             data-pkey="mk/80196/8463426"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80196/8463426'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 3.5rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80196/8463426']"
+                     @change="await p.toggle('mk/80196/8463426'); $el.checked = !!p.done['mk/80196/8463426']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-science-1/week-1-4-1-comparing-animals-17-08-2026-21-08-2026/Mammals Poster.png" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/mk/materials/cie-science-1/week-1-4-1-comparing-animals-17-08-2026-21-08-2026/Mammals Poster.png" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 Mammals Poster.png
               </a>
@@ -261,17 +390,27 @@
         
         
         <div data-item data-title="Birds Poster.png" data-type="file" data-sec="0"
+             data-pkey="mk/80196/8463425"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80196/8463425'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 3.5rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80196/8463425']"
+                     @change="await p.toggle('mk/80196/8463425'); $el.checked = !!p.done['mk/80196/8463425']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-science-1/week-1-4-1-comparing-animals-17-08-2026-21-08-2026/Birds Poster.png" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/mk/materials/cie-science-1/week-1-4-1-comparing-animals-17-08-2026-21-08-2026/Birds Poster.png" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 Birds Poster.png
               </a>
@@ -296,17 +435,27 @@
         
         
         <div data-item data-title="Unit 4.1 Key Vocabulary and Spelling Practice.pdf" data-type="file" data-sec="0"
+             data-pkey="mk/80196/7818958"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80196/7818958'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 3.5rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80196/7818958']"
+                     @change="await p.toggle('mk/80196/7818958'); $el.checked = !!p.done['mk/80196/7818958']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-science-1/week-1-4-1-comparing-animals-17-08-2026-21-08-2026/Unit 4.1 Key Vocabulary and Spelling Practice.pdf" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/mk/materials/cie-science-1/week-1-4-1-comparing-animals-17-08-2026-21-08-2026/Unit 4.1 Key Vocabulary and Spelling Practice.pdf" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 Unit 4.1 Key Vocabulary and Spelling Practice.pdf
               </a>
@@ -331,7 +480,7 @@
         
         
         <div data-title="Homework Due Every Tuesday of the Following Week" data-sec="1"
-             x-show="headingMatches($el, q, types, hw)"
+             x-show="headingMatches($el, f)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           Homework Due Every Tuesday of the Following Week
@@ -340,17 +489,27 @@
         
         
         <div data-item data-title="G1_W1_HW_Comparing Animals.pdf" data-type="file" data-sec="1"
+             data-pkey="mk/80196/8463447"
              data-hw="1"
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80196/8463447'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 3.5rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80196/8463447']"
+                     @change="await p.toggle('mk/80196/8463447'); $el.checked = !!p.done['mk/80196/8463447']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-science-1/week-1-4-1-comparing-animals-17-08-2026-21-08-2026/G1_W1_HW_Comparing Animals.pdf" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/mk/materials/cie-science-1/week-1-4-1-comparing-animals-17-08-2026-21-08-2026/G1_W1_HW_Comparing Animals.pdf" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 G1_W1_HW_Comparing Animals.pdf
               </a>
@@ -375,7 +534,7 @@
         
         
         <div data-title="Practice Worksheet " data-sec="2"
-             x-show="headingMatches($el, q, types, hw)"
+             x-show="headingMatches($el, f)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           Practice Worksheet 
@@ -384,17 +543,27 @@
         
         
         <div data-item data-title="Unit 4.1 Comapring Animals Practice Worksheet.pdf" data-type="file" data-sec="2"
+             data-pkey="mk/80196/8463461"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80196/8463461'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 3.5rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80196/8463461']"
+                     @change="await p.toggle('mk/80196/8463461'); $el.checked = !!p.done['mk/80196/8463461']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-science-1/week-1-4-1-comparing-animals-17-08-2026-21-08-2026/Unit 4.1 Comapring Animals Practice Worksheet.pdf" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/mk/materials/cie-science-1/week-1-4-1-comparing-animals-17-08-2026-21-08-2026/Unit 4.1 Comapring Animals Practice Worksheet.pdf" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 Unit 4.1 Comapring Animals Practice Worksheet.pdf
               </a>
@@ -419,17 +588,27 @@
         
         
         <div data-item data-title="Unit 4.1 Comapring Animals Practice Worksheet_Answer Key.pdf" data-type="file" data-sec="2"
+             data-pkey="mk/80196/8463462"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80196/8463462'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 3.5rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80196/8463462']"
+                     @change="await p.toggle('mk/80196/8463462'); $el.checked = !!p.done['mk/80196/8463462']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-science-1/week-1-4-1-comparing-animals-17-08-2026-21-08-2026/Unit 4.1 Comapring Animals Practice Worksheet_Answer Key.pdf" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/mk/materials/cie-science-1/week-1-4-1-comparing-animals-17-08-2026-21-08-2026/Unit 4.1 Comapring Animals Practice Worksheet_Answer Key.pdf" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 Unit 4.1 Comapring Animals Practice Worksheet_Answer Key.pdf
               </a>
@@ -454,12 +633,22 @@
         
         
         <div data-item data-title="Retrieval Practice Online" data-type="page" data-sec="2"
+             data-pkey="mk/80196/8463424"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80196/8463424'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80196/8463424']"
+                     @change="await p.toggle('mk/80196/8463424'); $el.checked = !!p.done['mk/80196/8463424']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="văn bản">📄</span>
             <div class="min-w-0 flex-1">
               
@@ -495,12 +684,22 @@
         
         
         <div data-item data-title="Sorting Mammals and Animals" data-type="external" data-sec="2"
+             data-pkey="mk/80196/8463452"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80196/8463452'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 3.5rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80196/8463452']"
+                     @change="await p.toggle('mk/80196/8463452'); $el.checked = !!p.done['mk/80196/8463452']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="liên kết ngoài">🔗</span>
             <div class="min-w-0 flex-1">
               
@@ -532,12 +731,22 @@
         
         
         <div data-item data-title="Characteristics of Mammals and Birds" data-type="external" data-sec="2"
+             data-pkey="mk/80196/8463455"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80196/8463455'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 3.5rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80196/8463455']"
+                     @change="await p.toggle('mk/80196/8463455'); $el.checked = !!p.done['mk/80196/8463455']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="liên kết ngoài">🔗</span>
             <div class="min-w-0 flex-1">
               
@@ -577,7 +786,7 @@
              @collapse-all.window="open = false"
              x-effect="if (q || filtering) open = true"
              data-module data-title="Workbook Answers"
-             x-show="moduleMatches($el, q, types, hw)"
+             x-show="moduleMatches($el, f)"
              class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <button @click="open = !open"
               class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50">
@@ -587,6 +796,12 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
         <span class="font-semibold text-slate-900 flex-1">Workbook Answers</span>
+        <template x-if="p.online">
+          <span class="text-xs shrink-0 px-1.5 py-0.5 rounded"
+                :class="moduleDone($el.closest('[data-module]'), p.done) === 1
+                        ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'"
+                x-text="moduleDone($el.closest('[data-module]'), p.done) + '/1'"></span>
+        </template>
         <span class="text-xs text-slate-400 shrink-0">1 mục</span>
       </button>
 
@@ -594,17 +809,27 @@
         
         
         <div data-item data-title="P_Science_2_workbook_answers.pdf" data-type="file" data-sec="0"
+             data-pkey="mk/80196/7818736"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80196/7818736'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80196/7818736']"
+                     @change="await p.toggle('mk/80196/7818736'); $el.checked = !!p.done['mk/80196/7818736']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-science-1/workbook-answers/P_Science_2_workbook_answers.pdf" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/mk/materials/cie-science-1/workbook-answers/P_Science_2_workbook_answers.pdf" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 P_Science_2_workbook_answers.pdf
               </a>
@@ -637,7 +862,7 @@
              @collapse-all.window="open = false"
              x-effect="if (q || filtering) open = true"
              data-module data-title="WEEK 1: Environments and Habitats   18/08/2025 - 22/08/2025"
-             x-show="moduleMatches($el, q, types, hw)"
+             x-show="moduleMatches($el, f)"
              class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <button @click="open = !open"
               class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50">
@@ -647,6 +872,12 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
         <span class="font-semibold text-slate-900 flex-1">WEEK 1: Environments and Habitats   18/08/2025 - 22/08/2025</span>
+        <template x-if="p.online">
+          <span class="text-xs shrink-0 px-1.5 py-0.5 rounded"
+                :class="moduleDone($el.closest('[data-module]'), p.done) === 1
+                        ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'"
+                x-text="moduleDone($el.closest('[data-module]'), p.done) + '/1'"></span>
+        </template>
         <span class="text-xs text-slate-400 shrink-0">1 mục</span>
       </button>
 
@@ -654,17 +885,27 @@
         
         
         <div data-item data-title="Science 1 Week 1 - Environments and Habitats.pdf" data-type="file" data-sec="0"
+             data-pkey="mk/80196/7818740"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80196/7818740'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 3.5rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80196/7818740']"
+                     @change="await p.toggle('mk/80196/7818740'); $el.checked = !!p.done['mk/80196/7818740']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/cie-science-1/week-1-environments-and-habitats-18-08-2025-22-08-2025/Science 1 Week 1 - Environments and Habitats.pdf" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/mk/materials/cie-science-1/week-1-environments-and-habitats-18-08-2025-22-08-2025/Science 1 Week 1 - Environments and Habitats.pdf" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 Science 1 Week 1 - Environments and Habitats.pdf
               </a>

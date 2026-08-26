@@ -25,36 +25,110 @@
       return (s || '').toLowerCase().normalize('NFD')
         .replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
     }
-    // Lọc loại nội dung (OR trong nhóm) và lọc Homework (AND với nhóm trên)
-    function typeOk(el, types, hw) {
-      if (hw && el.dataset.hw !== '1') return false;
-      return !types.length || types.includes(el.dataset.type);
+    // Lọc loại nội dung (OR trong nhóm); Homework và "chưa học" nhân AND với nhóm đó
+    function typeOk(el, f) {
+      if (f.hw && el.dataset.hw !== '1') return false;
+      if (f.todo && f.done[el.dataset.pkey]) return false;
+      return !f.types.length || f.types.includes(el.dataset.type);
     }
-    function itemMatches(el, q, types, hw) {
-      return typeOk(el, types, hw) && (!q || vnorm(el.dataset.title).includes(vnorm(q)));
+    function itemMatches(el, f) {
+      return typeOk(el, f) && (!f.q || vnorm(el.dataset.title).includes(vnorm(f.q)));
     }
     // Đề mục (SubHeader) chỉ hiện khi còn ít nhất 1 mục thuộc nó đang hiển thị
-    function headingMatches(el, q, types, hw) {
-      if (!q && !types.length && !hw) return true;
+    function headingMatches(el, f) {
+      if (!f.q && !f.types.length && !f.hw && !f.todo) return true;
       const box = el.closest('[data-module]');
       if (!box) return true;
       return Array.from(box.querySelectorAll('[data-sec="' + el.dataset.sec + '"][data-item]'))
-        .some(c => itemMatches(c, q, types, hw));
+        .some(c => itemMatches(c, f));
     }
-    function moduleMatches(el, q, types, hw) {
+    function moduleMatches(el, f) {
       const items = Array.from(el.querySelectorAll('[data-item]'));
-      const pass = items.filter(c => typeOk(c, types, hw));
+      const pass = items.filter(c => typeOk(c, f));
       if (!pass.length) return false;
-      if (!q) return true;
-      if (vnorm(el.dataset.title).includes(vnorm(q))) return true;
-      return pass.some(c => vnorm(c.dataset.title).includes(vnorm(q)));
+      if (!f.q) return true;
+      if (vnorm(el.dataset.title).includes(vnorm(f.q))) return true;
+      return pass.some(c => vnorm(c.dataset.title).includes(vnorm(f.q)));
+    }
+    // Đếm số mục đã học trong một tuần/bài
+    function moduleDone(el, done) {
+      const items = Array.from(el.querySelectorAll('[data-item]'));
+      return items.filter(c => done[c.dataset.pkey]).length;
+    }
+
+    // ---- Tiến độ học tập ----------------------------------------------------
+    // Đọc/ghi qua /api/progress (Cloudflare Pages Function + Workers KV).
+    // Mã bí mật chỉ cần khi GHI, lưu trong localStorage của trình duyệt.
+    // Nếu không có backend (mở file cục bộ, hoặc bản trên GitHub Pages) thì
+    // trang vẫn xem được bình thường, chỉ tắt phần đánh dấu.
+    function progressStore() {
+      return {
+        done: {}, ready: false, online: false, saving: 0, err: '',
+        secret: localStorage.getItem('lms_key') || '',
+
+        async init() {
+          try {
+            const r = await fetch('/api/progress', { headers: { accept: 'application/json' } });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const d = await r.json();
+            this.done = Object.fromEntries(Object.keys(d.items || {}).map(k => [k, true]));
+            this.online = true;
+          } catch (e) {
+            this.online = false;   // không có backend → chế độ chỉ đọc
+          }
+          this.ready = true;
+        },
+
+        async toggle(key) {
+          if (!this.online) return;
+          if (!this.secret) { if (!(await this.askSecret())) return; }
+          const next = !this.done[key];
+          next ? (this.done[key] = true) : delete this.done[key];
+          this.saving++; this.err = '';
+          try {
+            const r = await fetch('/api/progress', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json', 'x-progress-key': this.secret },
+              body: JSON.stringify({ key, done: next }),
+            });
+            if (r.status === 401) {
+              this.secret = ''; localStorage.removeItem('lms_key');
+              throw new Error('Mã bí mật không đúng');
+            }
+            if (!r.ok) throw new Error('Không lưu được (HTTP ' + r.status + ')');
+          } catch (e) {
+            next ? delete this.done[key] : (this.done[key] = true);  // hoàn tác
+            this.err = e.message;
+            setTimeout(() => (this.err = ''), 4000);
+          } finally {
+            this.saving--;
+          }
+        },
+
+        async askSecret() {
+          const v = (prompt('Nhập mã bí mật để đánh dấu tiến độ:') || '').trim();
+          if (!v) return false;
+          try {
+            const r = await fetch('/api/progress?check=1', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json', 'x-progress-key': v },
+              body: '{}',
+            });
+            if (!r.ok) { alert('Mã không đúng.'); return false; }
+          } catch { alert('Không kết nối được máy chủ.'); return false; }
+          this.secret = v; localStorage.setItem('lms_key', v);
+          return true;
+        },
+      };
     }
   </script>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen"
-      x-data="{ q: '', types: [], hw: false,
+      x-data="{ q: '', types: [], hw: false, todo: false, p: progressStore(),
                 toggle(t) { this.types.includes(t) ? this.types.splice(this.types.indexOf(t), 1) : this.types.push(t) },
-                get filtering() { return this.types.length > 0 || this.hw } }">
+                get filtering() { return this.types.length > 0 || this.hw || this.todo },
+                get f() { return { q: this.q, types: this.types, hw: this.hw, todo: this.todo, done: this.p.done } } }"
+      x-init="p.init()">
 
   <!-- Header dính, chứa tìm kiếm + Expand/Collapse All -->
   <header class="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
@@ -116,10 +190,29 @@
           💬 thảo luận
         </button>
         
-        <button x-show="filtering" x-cloak @click="types = []; hw = false"
+        <template x-if="p.online">
+          <button @click="todo = !todo"
+                  :class="todo ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-emerald-700 border-emerald-300 hover:border-emerald-500'"
+                  class="px-2 py-1 text-xs font-medium rounded-full border transition-colors">
+            ○ Chưa học
+          </button>
+        </template>
+        <button x-show="filtering" x-cloak @click="types = []; hw = false; todo = false"
                 class="px-2 py-1 text-xs text-slate-500 hover:text-indigo-600 underline">
           Bỏ lọc
         </button>
+      </div>
+
+      <!-- Tiến độ toàn môn + trạng thái lưu -->
+      <div x-show="p.ready && p.online" x-cloak class="mt-2 flex items-center gap-2 text-xs">
+        <div class="flex-1 h-1.5 rounded-full bg-slate-200 overflow-hidden">
+          <div class="h-full bg-emerald-500 transition-all duration-300"
+               :style="'width: ' + Math.round(Object.keys(p.done).filter(k => k.startsWith('mk/80232/')).length / 8 * 100) + '%'"></div>
+        </div>
+        <span class="text-slate-500 whitespace-nowrap"
+              x-text="Object.keys(p.done).filter(k => k.startsWith('mk/80232/')).length + '/8 đã học'"></span>
+        <span x-show="p.saving" x-cloak class="text-indigo-500">đang lưu…</span>
+        <span x-show="p.err" x-cloak class="text-rose-600" x-text="p.err"></span>
       </div>
     </div>
   </header>
@@ -132,7 +225,7 @@
              @collapse-all.window="open = false"
              x-effect="if (q || filtering) open = true"
              data-module data-title="TỔNG QUAN CHƯƠNG TRÌNH VIỆT NAM HỌC LỚP 1 "
-             x-show="moduleMatches($el, q, types, hw)"
+             x-show="moduleMatches($el, f)"
              class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <button @click="open = !open"
               class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50">
@@ -142,6 +235,12 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
         <span class="font-semibold text-slate-900 flex-1">TỔNG QUAN CHƯƠNG TRÌNH VIỆT NAM HỌC LỚP 1 </span>
+        <template x-if="p.online">
+          <span class="text-xs shrink-0 px-1.5 py-0.5 rounded"
+                :class="moduleDone($el.closest('[data-module]'), p.done) === 1
+                        ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'"
+                x-text="moduleDone($el.closest('[data-module]'), p.done) + '/1'"></span>
+        </template>
         <span class="text-xs text-slate-400 shrink-0">1 mục</span>
       </button>
 
@@ -149,12 +248,22 @@
         
         
         <div data-item data-title="GIỚI THIỆU CHƯƠNG TRÌNH" data-type="page" data-sec="0"
+             data-pkey="mk/80232/7945275"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80232/7945275'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80232/7945275']"
+                     @change="await p.toggle('mk/80232/7945275'); $el.checked = !!p.done['mk/80232/7945275']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="văn bản">📄</span>
             <div class="min-w-0 flex-1">
               
@@ -187,19 +296,19 @@
               <div x-show="o" x-collapse x-cloak
                    class="lms-content mt-2 mb-1 p-3 rounded-lg bg-slate-50 border border-slate-200 text-sm leading-relaxed">
                 <p>Chào mừng các con đã đến với kho học liệu môn Việt Nam học lớp 1.</p>
-<p><span><strong><a href="https://drive.google.com/file/d/1qCeCaq_Mq6TqkaoqOskYaTy0Tk8EXyeX/view?usp=sharing" rel="noopener" target="_blank"><img alt="pngtree-megaphone-vector-illustration-isolated-on-white-background-megaphone-clip-art-png-image_2016772.jpg" height="51" loading="lazy" src="materials/viet-nam-hoc-1/tong-quan-chuong-trinh-viet-nam-hoc-lop-1/pngtree-megaphone-vector-illustration-isolated-on-white-background-megaphone-clip-art-png-image_2016772-2.jpg" width="51"/></a>1. Mục tiêu, tổng quan chương trình</strong></span></p>
-<p><span><strong><img alt="Capture.PNG" height="297" loading="lazy" src="materials/viet-nam-hoc-1/tong-quan-chuong-trinh-viet-nam-hoc-lop-1/Capture-3.PNG" style="display: block; margin-left: auto; margin-right: auto;" width="517"/></strong></span></p>
+<p><span><strong><a href="https://drive.google.com/file/d/1qCeCaq_Mq6TqkaoqOskYaTy0Tk8EXyeX/view?usp=sharing" rel="noopener" target="_blank"><img alt="pngtree-megaphone-vector-illustration-isolated-on-white-background-megaphone-clip-art-png-image_2016772.jpg" height="51" loading="lazy" src="https://sinarale.github.io/lms/mk/materials/viet-nam-hoc-1/tong-quan-chuong-trinh-viet-nam-hoc-lop-1/pngtree-megaphone-vector-illustration-isolated-on-white-background-megaphone-clip-art-png-image_2016772-2.jpg" width="51"/></a>1. Mục tiêu, tổng quan chương trình</strong></span></p>
+<p><span><strong><img alt="Capture.PNG" height="297" loading="lazy" src="https://sinarale.github.io/lms/mk/materials/viet-nam-hoc-1/tong-quan-chuong-trinh-viet-nam-hoc-lop-1/Capture-3.PNG" style="display: block; margin-left: auto; margin-right: auto;" width="517"/></strong></span></p>
 <p> </p>
 <p>Môn Việt Nam học sẽ giúp các con tìm hiểu về những bản sắc văn hóa Việt Nam như các hoạt động, lễ hội truyền thống, phong tục tập quán xa xưa. Từ đó, các con sẽ thêm hiểu, thêm yêu và tự hào về con người, đất nước Việt Nam, có lòng tự tôn dân tộc.</p>
 <p> </p>
-<p><span><strong><a href="https://drive.google.com/file/d/1qEiitFIa2Zhzt2hejp4YTKPjkRYn8zIK/view?usp=sharing" rel="noopener" target="_blank"><img alt="pngtree-megaphone-vector-illustration-isolated-on-white-background-megaphone-clip-art-png-image_2016772.jpg" height="66" loading="lazy" src="materials/viet-nam-hoc-1/tong-quan-chuong-trinh-viet-nam-hoc-lop-1/pngtree-megaphone-vector-illustration-isolated-on-white-background-megaphone-clip-art-png-image_2016772-2.jpg" width="66"/></a>2. Chương trình Việt Nam học lớp Một</strong></span><strong><span> bao gồm 6 chủ đề:</span></strong></p>
+<p><span><strong><a href="https://drive.google.com/file/d/1qEiitFIa2Zhzt2hejp4YTKPjkRYn8zIK/view?usp=sharing" rel="noopener" target="_blank"><img alt="pngtree-megaphone-vector-illustration-isolated-on-white-background-megaphone-clip-art-png-image_2016772.jpg" height="66" loading="lazy" src="https://sinarale.github.io/lms/mk/materials/viet-nam-hoc-1/tong-quan-chuong-trinh-viet-nam-hoc-lop-1/pngtree-megaphone-vector-illustration-isolated-on-white-background-megaphone-clip-art-png-image_2016772-2.jpg" width="66"/></a>2. Chương trình Việt Nam học lớp Một</strong></span><strong><span> bao gồm 6 chủ đề:</span></strong></p>
 <p><span>1. Trò chơi dân gian và Đồng dao</span></p>
 <p><span>2. Văn hóa chào hỏi</span></p>
 <p><span>3. Hoa trái Việt Nam</span></p>
 <p><span>4. Dòng họ của gia đình em</span></p>
 <p><span>5. Câu hát ru</span></p>
 <p><span>6. Tranh dân gian Đông Hồ</span></p>
-<p style="text-align: center;"><img alt="Capture-1.PNG" height="354" loading="lazy" src="materials/viet-nam-hoc-1/tong-quan-chuong-trinh-viet-nam-hoc-lop-1/Capture-1-1.PNG" width="576"/><br/><strong><em>Chúc các con sẽ có những giây phút trải nghiệm thật tuyệt vời với kho học liệu thầy cô Vinschool cung cấp nhé!</em><br/></strong></p>
+<p style="text-align: center;"><img alt="Capture-1.PNG" height="354" loading="lazy" src="https://sinarale.github.io/lms/mk/materials/viet-nam-hoc-1/tong-quan-chuong-trinh-viet-nam-hoc-lop-1/Capture-1-1.PNG" width="576"/><br/><strong><em>Chúc các con sẽ có những giây phút trải nghiệm thật tuyệt vời với kho học liệu thầy cô Vinschool cung cấp nhé!</em><br/></strong></p>
 <p><span>Để bắt đầu với các nội dung chi tiết, các con hãy nhấn vào dòng <em>Click here</em> hoặc lựa chọn "Modules" ở khung điều hướng bên trái.</span></p>
 <p><a href="https://lms.vinschool.edu.vn/courses/80232/modules" rel="noopener" target="_blank"><span><img alt="unnamed.png" height="120" loading="lazy" src="https://lms.vinschool.edu.vn/users/38259/files/2757164/preview?verifier=lnjRGlTA3VQI53rf8qPBoOTzicbH8WGvbu2fwHbS" style="display: block; margin-left: auto; margin-right: auto;" width="412"/></span></a></p>
               </div>
@@ -219,7 +328,7 @@
              @collapse-all.window="open = false"
              x-effect="if (q || filtering) open = true"
              data-module data-title="CHƯƠNG 1 - TRÒ CHƠI DÂN GIAN VÀ ĐỒNG DAO"
-             x-show="moduleMatches($el, q, types, hw)"
+             x-show="moduleMatches($el, f)"
              class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <button @click="open = !open"
               class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50">
@@ -229,6 +338,12 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
         <span class="font-semibold text-slate-900 flex-1">CHƯƠNG 1 - TRÒ CHƠI DÂN GIAN VÀ ĐỒNG DAO</span>
+        <template x-if="p.online">
+          <span class="text-xs shrink-0 px-1.5 py-0.5 rounded"
+                :class="moduleDone($el.closest('[data-module]'), p.done) === 7
+                        ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'"
+                x-text="moduleDone($el.closest('[data-module]'), p.done) + '/7'"></span>
+        </template>
         <span class="text-xs text-slate-400 shrink-0">11 mục</span>
       </button>
 
@@ -236,7 +351,7 @@
         
         
         <div data-title="TỰ HỌC- CHỦ ĐỀ 1" data-sec="1"
-             x-show="headingMatches($el, q, types, hw)"
+             x-show="headingMatches($el, f)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           TỰ HỌC- CHỦ ĐỀ 1
@@ -245,12 +360,22 @@
         
         
         <div data-item data-title="[1] Tự học_Chủ đề1" data-type="page" data-sec="1"
+             data-pkey="mk/80232/7945320"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80232/7945320'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80232/7945320']"
+                     @change="await p.toggle('mk/80232/7945320'); $el.checked = !!p.done['mk/80232/7945320']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="văn bản">📄</span>
             <div class="min-w-0 flex-1">
               
@@ -303,7 +428,7 @@
         
         
         <div data-title="NỘI DUNG DẠY TRÊN LỚP- CHỦ ĐỀ 1" data-sec="2"
-             x-show="headingMatches($el, q, types, hw)"
+             x-show="headingMatches($el, f)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           NỘI DUNG DẠY TRÊN LỚP- CHỦ ĐỀ 1
@@ -312,12 +437,22 @@
         
         
         <div data-item data-title="Nội dung dạy trên lớp_Chủ đề 1" data-type="page" data-sec="2"
+             data-pkey="mk/80232/7945323"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80232/7945323'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 2.25rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80232/7945323']"
+                     @change="await p.toggle('mk/80232/7945323'); $el.checked = !!p.done['mk/80232/7945323']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="văn bản">📄</span>
             <div class="min-w-0 flex-1">
               
@@ -372,7 +507,7 @@
         
         
         <div data-title="BÀI TẬP CUỐI CHỦ ĐỀ 1" data-sec="3"
-             x-show="headingMatches($el, q, types, hw)"
+             x-show="headingMatches($el, f)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           BÀI TẬP CUỐI CHỦ ĐỀ 1
@@ -381,12 +516,22 @@
         
         
         <div data-item data-title="Bài tập cuối chương_Chủ đề 1" data-type="assignment" data-sec="3"
+             data-pkey="mk/80232/7945325"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80232/7945325'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 2.25rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80232/7945325']"
+                     @change="await p.toggle('mk/80232/7945325'); $el.checked = !!p.done['mk/80232/7945325']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="bài tập">📝</span>
             <div class="min-w-0 flex-1">
               
@@ -435,7 +580,7 @@
         
         
         <div data-title="THAM KHẢO CHỦ ĐỀ 1" data-sec="4"
-             x-show="headingMatches($el, q, types, hw)"
+             x-show="headingMatches($el, f)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           THAM KHẢO CHỦ ĐỀ 1
@@ -444,17 +589,27 @@
         
         
         <div data-item data-title="Bài tập tham khảo_Chủ đề 1.pdf" data-type="file" data-sec="4"
+             data-pkey="mk/80232/7945327"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80232/7945327'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 2.25rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80232/7945327']"
+                     @change="await p.toggle('mk/80232/7945327'); $el.checked = !!p.done['mk/80232/7945327']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="tài liệu">📎</span>
             <div class="min-w-0 flex-1">
               
               <!-- Tài liệu đã tải về local -->
-              <a href="materials/viet-nam-hoc-1/chuong-1-tro-choi-dan-gian-va-dong-dao/Phiếu thiết kế poster_Chủ đề 1-1.pdf" target="_blank" rel="noopener"
+              <a href="https://sinarale.github.io/lms/mk/materials/viet-nam-hoc-1/chuong-1-tro-choi-dan-gian-va-dong-dao/Phiếu thiết kế poster_Chủ đề 1-1.pdf" target="_blank" rel="noopener"
                  class="text-sm font-medium text-slate-800 hover:text-indigo-700 hover:underline">
                 Bài tập tham khảo_Chủ đề 1.pdf
               </a>
@@ -479,12 +634,22 @@
         
         
         <div data-item data-title="Tài liệu tham khảo_Chủ đề 1" data-type="assignment" data-sec="4"
+             data-pkey="mk/80232/7945328"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80232/7945328'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 2.25rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80232/7945328']"
+                     @change="await p.toggle('mk/80232/7945328'); $el.checked = !!p.done['mk/80232/7945328']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="bài tập">📝</span>
             <div class="min-w-0 flex-1">
               
@@ -527,12 +692,22 @@
         
         
         <div data-item data-title="Thảo luận_Chủ đề 1 " data-type="discussion" data-sec="4"
+             data-pkey="mk/80232/7945329"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80232/7945329'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80232/7945329']"
+                     @change="await p.toggle('mk/80232/7945329'); $el.checked = !!p.done['mk/80232/7945329']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="thảo luận">💬</span>
             <div class="min-w-0 flex-1">
               
@@ -573,12 +748,22 @@
         
         
         <div data-item data-title="Video tổng hợp_Chương 1" data-type="page" data-sec="4"
+             data-pkey="mk/80232/7945330"
              
-             x-show="itemMatches($el, q, types, hw)"
+             x-show="itemMatches($el, f)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
-             class="group">
+             class="group" :class="p.done['mk/80232/7945330'] ? 'bg-emerald-50/60' : ''">
           <div class="flex items-start gap-3 px-4 py-2.5" style="padding-left: 1.0rem">
+            <!-- Đánh dấu đã học -->
+            <template x-if="p.online">
+              <!-- Sau mỗi lần bấm, ép DOM khớp lại trạng thái thật: nếu ghi
+                   thất bại (sai mã, mất mạng) thì ô tick tự bật về như cũ -->
+              <input type="checkbox" title="Đánh dấu đã học"
+                     x-effect="$el.checked = !!p.done['mk/80232/7945330']"
+                     @change="await p.toggle('mk/80232/7945330'); $el.checked = !!p.done['mk/80232/7945330']"
+                     class="mt-1 shrink-0 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </template>
             <span class="mt-0.5 shrink-0 text-base leading-none" title="văn bản">📄</span>
             <div class="min-w-0 flex-1">
               
