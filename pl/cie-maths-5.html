@@ -25,33 +25,36 @@
       return (s || '').toLowerCase().normalize('NFD')
         .replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
     }
-    function typeOk(el, types) {
+    // Lọc loại nội dung (OR trong nhóm) và lọc Homework (AND với nhóm trên)
+    function typeOk(el, types, hw) {
+      if (hw && el.dataset.hw !== '1') return false;
       return !types.length || types.includes(el.dataset.type);
     }
-    function itemMatches(el, q, types) {
-      return typeOk(el, types) && (!q || vnorm(el.dataset.title).includes(vnorm(q)));
+    function itemMatches(el, q, types, hw) {
+      return typeOk(el, types, hw) && (!q || vnorm(el.dataset.title).includes(vnorm(q)));
     }
     // Đề mục (SubHeader) chỉ hiện khi còn ít nhất 1 mục thuộc nó đang hiển thị
-    function headingMatches(el, q, types) {
-      if (!q && !types.length) return true;
+    function headingMatches(el, q, types, hw) {
+      if (!q && !types.length && !hw) return true;
       const box = el.closest('[data-module]');
       if (!box) return true;
       return Array.from(box.querySelectorAll('[data-sec="' + el.dataset.sec + '"][data-item]'))
-        .some(c => itemMatches(c, q, types));
+        .some(c => itemMatches(c, q, types, hw));
     }
-    function moduleMatches(el, q, types) {
+    function moduleMatches(el, q, types, hw) {
       const items = Array.from(el.querySelectorAll('[data-item]'));
-      const passType = items.filter(c => typeOk(c, types));
-      if (!passType.length) return false;
+      const pass = items.filter(c => typeOk(c, types, hw));
+      if (!pass.length) return false;
       if (!q) return true;
       if (vnorm(el.dataset.title).includes(vnorm(q))) return true;
-      return passType.some(c => vnorm(c.dataset.title).includes(vnorm(q)));
+      return pass.some(c => vnorm(c.dataset.title).includes(vnorm(q)));
     }
   </script>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen"
-      x-data="{ q: '', types: [],
-                toggle(t) { this.types.includes(t) ? this.types.splice(this.types.indexOf(t), 1) : this.types.push(t) } }">
+      x-data="{ q: '', types: [], hw: false,
+                toggle(t) { this.types.includes(t) ? this.types.splice(this.types.indexOf(t), 1) : this.types.push(t) },
+                get filtering() { return this.types.length > 0 || this.hw } }">
 
   <!-- Header dính, chứa tìm kiếm + Expand/Collapse All -->
   <header class="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
@@ -64,7 +67,7 @@
         </a>
         <div class="min-w-0 flex-1">
           <h1 class="text-lg font-bold text-slate-900 truncate">CIE Maths 5</h1>
-          <p class="text-xs text-slate-500">PL · 1 tuần/bài · cập nhật 2026-08-25 16:40</p>
+          <p class="text-xs text-slate-500">PL · 1 tuần/bài · cập nhật 2026-08-26 08:34</p>
         </div>
       </div>
       <div class="mt-2 flex items-center gap-2">
@@ -85,8 +88,16 @@
         </button>
       </div>
 
-      <!-- Bộ lọc theo loại nội dung -->
+      <!-- Bộ lọc: Homework (lọc riêng) + loại nội dung -->
       <div class="mt-2 flex items-center gap-1.5 flex-wrap">
+        
+        <button @click="hw = !hw"
+                :class="hw ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-rose-600 border-rose-300 hover:border-rose-500'"
+                class="px-2 py-1 text-xs font-medium rounded-full border transition-colors">
+          🏠 Homework
+        </button>
+        <span class="w-px h-4 bg-slate-300 mx-0.5"></span>
+        
         
         <button @click="toggle('page')"
                 :class="types.includes('page') ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-300 hover:border-indigo-400'"
@@ -106,7 +117,7 @@
           🔗 liên kết ngoài
         </button>
         
-        <button x-show="types.length" x-cloak @click="types = []"
+        <button x-show="filtering" x-cloak @click="types = []; hw = false"
                 class="px-2 py-1 text-xs text-slate-500 hover:text-indigo-600 underline">
           Bỏ lọc
         </button>
@@ -120,9 +131,9 @@
     <section x-data="{ open: true }"
              @expand-all.window="open = true"
              @collapse-all.window="open = false"
-             x-effect="if (q || types.length) open = true"
+             x-effect="if (q || filtering) open = true"
              data-module data-title="Week 1 - Unit 1.1 Place Value"
-             x-show="moduleMatches($el, q, types)"
+             x-show="moduleMatches($el, q, types, hw)"
              class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <button @click="open = !open"
               class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50">
@@ -139,7 +150,7 @@
         
         
         <div data-title="Homework" data-sec="1"
-             x-show="headingMatches($el, q, types)"
+             x-show="headingMatches($el, q, types, hw)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           Homework
@@ -148,7 +159,8 @@
         
         
         <div data-item data-title="Workbook pages 8-13" data-type="page" data-sec="1"
-             x-show="itemMatches($el, q, types)"
+             data-hw="1"
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -195,7 +207,7 @@
         
         
         <div data-title="Class Resources" data-sec="2"
-             x-show="headingMatches($el, q, types)"
+             x-show="headingMatches($el, q, types, hw)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           Class Resources
@@ -204,7 +216,8 @@
         
         
         <div data-item data-title="3.  6Np01 - Understand and explain the value of each digit in decimals.pptx" data-type="file" data-sec="2"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -238,7 +251,8 @@
         
         
         <div data-item data-title="4.  6Np.02 – Use knowledge of place value to multiply and divide whole numbers by 10, 100 and 1,000..pptx" data-type="file" data-sec="2"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -259,7 +273,7 @@
                 
                 
                 
-                <span title="Cập nhật lần cuối tại nguồn">🕓 24/08</span>
+                <span title="Cập nhật lần cuối tại nguồn">🕓 25/08</span>
                 
                 
               </div>
@@ -272,7 +286,8 @@
         
         
         <div data-item data-title="6.  6Np.03 – Compose, decompose and regroup numbers including decimals..pptx" data-type="file" data-sec="2"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -293,7 +308,7 @@
                 
                 
                 
-                <span title="Cập nhật lần cuối tại nguồn">🕓 24/08</span>
+                <span title="Cập nhật lần cuối tại nguồn">🕓 25/08</span>
                 
                 
               </div>
@@ -306,7 +321,7 @@
         
         
         <div data-title="Optional Activities" data-sec="3"
-             x-show="headingMatches($el, q, types)"
+             x-show="headingMatches($el, q, types, hw)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           Optional Activities
@@ -315,7 +330,8 @@
         
         
         <div data-item data-title="Decimal Place Value - Youtube Video" data-type="external" data-sec="3"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -351,7 +367,8 @@
         
         
         <div data-item data-title="Multiplying Decimals by 10, 100 and 1,000 - Youtube Video" data-type="external" data-sec="3"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -387,7 +404,8 @@
         
         
         <div data-item data-title="Dividing Decimals by 10, 100 and 1,000 - Youtube Video" data-type="external" data-sec="3"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -423,7 +441,8 @@
         
         
         <div data-item data-title="Decimal Place Value Challenge - Worksheet with answers" data-type="external" data-sec="3"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -459,7 +478,8 @@
         
         
         <div data-item data-title="Multiplying and dividing decimals by 10, 100 and 1,000 - Worksheet with answers" data-type="external" data-sec="3"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -495,7 +515,8 @@
         
         
         <div data-item data-title="Decimals - Reasoning and Problem Solving" data-type="external" data-sec="3"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -531,7 +552,8 @@
         
         
         <div data-item data-title="Place Value - Reasoning and Problem Solving" data-type="external" data-sec="3"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">

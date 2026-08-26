@@ -25,33 +25,36 @@
       return (s || '').toLowerCase().normalize('NFD')
         .replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
     }
-    function typeOk(el, types) {
+    // Lọc loại nội dung (OR trong nhóm) và lọc Homework (AND với nhóm trên)
+    function typeOk(el, types, hw) {
+      if (hw && el.dataset.hw !== '1') return false;
       return !types.length || types.includes(el.dataset.type);
     }
-    function itemMatches(el, q, types) {
-      return typeOk(el, types) && (!q || vnorm(el.dataset.title).includes(vnorm(q)));
+    function itemMatches(el, q, types, hw) {
+      return typeOk(el, types, hw) && (!q || vnorm(el.dataset.title).includes(vnorm(q)));
     }
     // Đề mục (SubHeader) chỉ hiện khi còn ít nhất 1 mục thuộc nó đang hiển thị
-    function headingMatches(el, q, types) {
-      if (!q && !types.length) return true;
+    function headingMatches(el, q, types, hw) {
+      if (!q && !types.length && !hw) return true;
       const box = el.closest('[data-module]');
       if (!box) return true;
       return Array.from(box.querySelectorAll('[data-sec="' + el.dataset.sec + '"][data-item]'))
-        .some(c => itemMatches(c, q, types));
+        .some(c => itemMatches(c, q, types, hw));
     }
-    function moduleMatches(el, q, types) {
+    function moduleMatches(el, q, types, hw) {
       const items = Array.from(el.querySelectorAll('[data-item]'));
-      const passType = items.filter(c => typeOk(c, types));
-      if (!passType.length) return false;
+      const pass = items.filter(c => typeOk(c, types, hw));
+      if (!pass.length) return false;
       if (!q) return true;
       if (vnorm(el.dataset.title).includes(vnorm(q))) return true;
-      return passType.some(c => vnorm(c.dataset.title).includes(vnorm(q)));
+      return pass.some(c => vnorm(c.dataset.title).includes(vnorm(q)));
     }
   </script>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen"
-      x-data="{ q: '', types: [],
-                toggle(t) { this.types.includes(t) ? this.types.splice(this.types.indexOf(t), 1) : this.types.push(t) } }">
+      x-data="{ q: '', types: [], hw: false,
+                toggle(t) { this.types.includes(t) ? this.types.splice(this.types.indexOf(t), 1) : this.types.push(t) },
+                get filtering() { return this.types.length > 0 || this.hw } }">
 
   <!-- Header dính, chứa tìm kiếm + Expand/Collapse All -->
   <header class="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
@@ -64,7 +67,7 @@
         </a>
         <div class="min-w-0 flex-1">
           <h1 class="text-lg font-bold text-slate-900 truncate">CIE Science 1</h1>
-          <p class="text-xs text-slate-500">MK · 3 tuần/bài · cập nhật 2026-08-25 16:40</p>
+          <p class="text-xs text-slate-500">MK · 3 tuần/bài · cập nhật 2026-08-26 08:34</p>
         </div>
       </div>
       <div class="mt-2 flex items-center gap-2">
@@ -85,8 +88,16 @@
         </button>
       </div>
 
-      <!-- Bộ lọc theo loại nội dung -->
+      <!-- Bộ lọc: Homework (lọc riêng) + loại nội dung -->
       <div class="mt-2 flex items-center gap-1.5 flex-wrap">
+        
+        <button @click="hw = !hw"
+                :class="hw ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-rose-600 border-rose-300 hover:border-rose-500'"
+                class="px-2 py-1 text-xs font-medium rounded-full border transition-colors">
+          🏠 Homework
+        </button>
+        <span class="w-px h-4 bg-slate-300 mx-0.5"></span>
+        
         
         <button @click="toggle('page')"
                 :class="types.includes('page') ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-300 hover:border-indigo-400'"
@@ -106,7 +117,7 @@
           🔗 liên kết ngoài
         </button>
         
-        <button x-show="types.length" x-cloak @click="types = []"
+        <button x-show="filtering" x-cloak @click="types = []; hw = false"
                 class="px-2 py-1 text-xs text-slate-500 hover:text-indigo-600 underline">
           Bỏ lọc
         </button>
@@ -120,9 +131,9 @@
     <section x-data="{ open: true }"
              @expand-all.window="open = true"
              @collapse-all.window="open = false"
-             x-effect="if (q || types.length) open = true"
+             x-effect="if (q || filtering) open = true"
              data-module data-title="Week 1: 4.1 Comparing Animals (17/08/2026-21/08/2026)"
-             x-show="moduleMatches($el, q, types)"
+             x-show="moduleMatches($el, q, types, hw)"
              class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <button @click="open = !open"
               class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50">
@@ -139,7 +150,8 @@
         
         
         <div data-item data-title="Lesson Resources" data-type="page" data-sec="0"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -179,7 +191,8 @@
         
         
         <div data-item data-title="G1_W1_4.1 Comparing Animals.pdf" data-type="file" data-sec="0"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -213,7 +226,8 @@
         
         
         <div data-item data-title="Mammals Poster.png" data-type="file" data-sec="0"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -247,7 +261,8 @@
         
         
         <div data-item data-title="Birds Poster.png" data-type="file" data-sec="0"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -281,7 +296,8 @@
         
         
         <div data-item data-title="Unit 4.1 Key Vocabulary and Spelling Practice.pdf" data-type="file" data-sec="0"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -315,7 +331,7 @@
         
         
         <div data-title="Homework Due Every Tuesday of the Following Week" data-sec="1"
-             x-show="headingMatches($el, q, types)"
+             x-show="headingMatches($el, q, types, hw)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           Homework Due Every Tuesday of the Following Week
@@ -324,7 +340,8 @@
         
         
         <div data-item data-title="G1_W1_HW_Comparing Animals.pdf" data-type="file" data-sec="1"
-             x-show="itemMatches($el, q, types)"
+             data-hw="1"
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -358,7 +375,7 @@
         
         
         <div data-title="Practice Worksheet " data-sec="2"
-             x-show="headingMatches($el, q, types)"
+             x-show="headingMatches($el, q, types, hw)"
              class="px-4 py-2 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500"
              style="padding-left: 1.0rem">
           Practice Worksheet 
@@ -367,7 +384,8 @@
         
         
         <div data-item data-title="Unit 4.1 Comapring Animals Practice Worksheet.pdf" data-type="file" data-sec="2"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -401,7 +419,8 @@
         
         
         <div data-item data-title="Unit 4.1 Comapring Animals Practice Worksheet_Answer Key.pdf" data-type="file" data-sec="2"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -435,7 +454,8 @@
         
         
         <div data-item data-title="Retrieval Practice Online" data-type="page" data-sec="2"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -475,7 +495,8 @@
         
         
         <div data-item data-title="Sorting Mammals and Animals" data-type="external" data-sec="2"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -511,7 +532,8 @@
         
         
         <div data-item data-title="Characteristics of Mammals and Birds" data-type="external" data-sec="2"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -553,9 +575,9 @@
     <section x-data="{ open: false }"
              @expand-all.window="open = true"
              @collapse-all.window="open = false"
-             x-effect="if (q || types.length) open = true"
+             x-effect="if (q || filtering) open = true"
              data-module data-title="Workbook Answers"
-             x-show="moduleMatches($el, q, types)"
+             x-show="moduleMatches($el, q, types, hw)"
              class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <button @click="open = !open"
               class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50">
@@ -572,7 +594,8 @@
         
         
         <div data-item data-title="P_Science_2_workbook_answers.pdf" data-type="file" data-sec="0"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
@@ -612,9 +635,9 @@
     <section x-data="{ open: false }"
              @expand-all.window="open = true"
              @collapse-all.window="open = false"
-             x-effect="if (q || types.length) open = true"
+             x-effect="if (q || filtering) open = true"
              data-module data-title="WEEK 1: Environments and Habitats   18/08/2025 - 22/08/2025"
-             x-show="moduleMatches($el, q, types)"
+             x-show="moduleMatches($el, q, types, hw)"
              class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <button @click="open = !open"
               class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50">
@@ -631,7 +654,8 @@
         
         
         <div data-item data-title="Science 1 Week 1 - Environments and Habitats.pdf" data-type="file" data-sec="0"
-             x-show="itemMatches($el, q, types)"
+             
+             x-show="itemMatches($el, q, types, hw)"
              x-data="{ o: false }"
              @expand-all.window="o = true" @collapse-all.window="o = false"
              class="group">
