@@ -7,7 +7,7 @@
   <title>Ôn tập · CIE Science 5</title>
   <!-- CSS dựng sẵn lúc build (tên file có hash). Thiếu Node thì builder tự
        thay dòng này bằng Tailwind CDN. -->
-  <link rel="stylesheet" href="../assets/tw.352c0dfc.css">
+  <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="../assets/alpine.63d2636a.js"></script>
   <script>
     // ── Vỏ tĩnh, nội dung nạp bằng fetch ────────────────────────────────────
@@ -22,8 +22,10 @@
         data: null, err: '', ready: false, online: false,
         secret: localStorage.getItem('lms_key') || '',
         cards: {},              // item_id → {n, wrong, box, ease, due, last_ts}
-        screen: 'start',        // start | quiz | done
-        mode: 'quiz',           // quiz | cards | summary | map
+        // Vào trang là thấy TÓM TẮT: đọc trước, làm bài sau. Hai chế độ kia phải
+        // bấm mới vào, nên screen khởi tạo theo 'summary' cho khớp go('summary').
+        screen: 'summary',      // start | quiz | done | summary
+        mode: 'summary',        // quiz | cards | summary | map
         revealed: false,        // flashcard: đã lật chưa
         learnAt: 0,             // chế độ Học: đang xem thẻ thứ mấy
         seen: {},               // chế độ Kiểm tra: id → 'known' | 'again' (trong phiên)
@@ -33,7 +35,9 @@
         openMap: {},            // cây bên trái: nhánh nào đang mở
         // Bộ lọc các phần trong tóm tắt. Mỗi loại một màu cố định (xem KINDS) để
         // nhìn là biết đang đọc loại gì, và bật/tắt được từng loại.
-        show: JSON.parse(localStorage.getItem('lms_show') || 'null') || { gloss: true, facts: true, list: true, watch: true, exp: true, compare: true },
+        // Chip lọc = LỰA CHỌN của người dùng, không phải trạng thái hiển thị.
+        // Không chọn chip nào (mặc định) nghĩa là xem tất cả — xem getter `show`.
+        filt: JSON.parse(localStorage.getItem('lms_pick') || 'null') || { gloss: false, facts: false, list: false, watch: false, exp: false, compare: false },
         detail: localStorage.getItem('lms_detail') === '1',
         scope: null,            // chủ đề đang học; null = cả môn
         navOpen: false,         // ngăn kéo cây trên màn hình hẹp
@@ -126,9 +130,14 @@
         // Câu đã thuộc vẫn được ôn, nhưng CHỈ khi thật sự đến hạn (bậc 6 ≈ 32
         // ngày) và không bao giờ chen vào phần ưu tiên. Thiếu bước này thì bộ
         // thẻ phình mãi và mỗi phiên càng lúc càng toàn bài đã thuộc.
+        // Ngưỡng "đã nắm chắc". Ba điều kiện đánh vào ba kiểu may rủi khác nhau:
+        // số lần chặn đúng-vài-lần-đầu, tỉ lệ sai chặn sai rải rác, bậc ôn chặn
+        // đúng dồn trong MỘT buổi (muốn lên bậc phải đúng ở các lần cách nhau
+        // nhiều ngày). Hạ ngưỡng thì hạ cả ba, đừng bỏ hẳn điều kiện nào.
+        RETIRE: { n: 3, box: 3, err: 0.25 },
         retired(q) {
-          const c = this.cards[q.id];
-          return !!c && c.n >= 8 && c.box >= 5 && c.wrong / c.n <= 0.10;
+          const c = this.cards[q.id], R = this.RETIRE;
+          return !!c && c.n >= R.n && c.box >= R.box && c.wrong / c.n <= R.err;
         },
         get nRetired() { return this.scopedItems.filter(q => this.retired(q)).length; },
         // Thanh "đã nắm chắc" ở màn hình đầu tính theo ĐÚNG tab đang mở (trắc nghiệm
@@ -164,7 +173,25 @@
           { k: 'exp',     t: '🔬 Thí nghiệm',  on: 'bg-violet-600 text-white border-violet-600',  off: 'bg-white text-violet-700 border-violet-300' },
           { k: 'compare', t: '⇄ So sánh',      on: 'bg-slate-700 text-white border-slate-700',    off: 'bg-white text-slate-700 border-slate-300' },
         ],
-        toggleShow(k) { this.show[k] = !this.show[k]; localStorage.setItem('lms_show', JSON.stringify(this.show)); },
+        // ⚠ ĐỪNG đặt tên state này là `pick`: đã có method pick(c) chọn đáp án
+        // trắc nghiệm, khoá sau ghi đè khoá trước trong object literal.
+        toggleShow(k) { this.filt[k] = !this.filt[k]; localStorage.setItem('lms_pick', JSON.stringify(this.filt)); },
+        get anyPick() { return Object.values(this.filt).some(Boolean); },
+        // Hiển thị thật sự: chưa chọn gì thì hiện hết, chọn rồi thì chỉ hiện phần đã chọn.
+        get show() {
+          const on = this.anyPick;
+          return Object.fromEntries(this.KINDS.map(kd => [kd.k, on ? !!this.filt[kd.k] : true]));
+        },
+        // Chip nào không có nội dung trong phạm vi đang xem thì ẩn hẳn: bấm vào
+        // một bộ lọc rỗng chỉ làm trẻ tưởng trang hỏng. Tính theo scopedSummary
+        // nên đổi phạm vi ở cây bên trái là chip tự hiện/ẩn theo.
+        hasKind(k) {
+          const F = { gloss: 'glossary', facts: null, list: 'checklists',
+                      watch: 'watch_out', exp: 'experiments', compare: 'compares' };
+          return this.scopedSummary.some(sec =>
+            (k === 'facts' ? this.points(sec) : (sec[F[k]] || [])).length);
+        },
+        get kinds() { return this.KINDS.filter(kd => this.hasKind(kd.k)); },
         toggleDetail() { this.detail = !this.detail; localStorage.setItem('lms_detail', this.detail ? '1' : '0'); },
 
         // ── Phạm vi học ───────────────────────────────────────────────────────
@@ -258,6 +285,18 @@
           r.any = r.glossary.length || r.points.length || r.watch.length
                   || this.secLists(sec).length || this.secExps(sec).length;
           return r;
+        },
+        // Tách câu đầu của "điều cần nhớ" để in đậm: theo SPEC câu đầu LÀ kiến thức,
+        // phần sau chỉ giải thích. Bỏ qua dấu chấm của "°C." và trong "(p.36)".
+        lead(t) {
+          t = t || '';
+          const re = /[.!?](?=\s|$)/g; let m;
+          while ((m = re.exec(t))) {
+            const i = m.index, before = t.slice(0, i);
+            if (before.endsWith('°C') || /\(p\.[^)]*$/.test(before) || /\bp$/.test(before)) continue;
+            return [t.slice(0, i + 1), t.slice(i + 1)];
+          }
+          return [t, ''];
         },
         points(sec) {
           if (Array.isArray(sec.points)) return sec.points;
@@ -720,9 +759,10 @@
               <div class="h-full bg-emerald-500 transition-all duration-300"
                    :style="'width:' + Math.round(modeRetired / modeItems.length * 100) + '%'"></div>
             </div>
-            <!-- "nắm chắc" ≠ nút "Đã thuộc" trong Kiểm tra: đây là mức nghỉ hưu
-                 (≥8 lần, sai ≤10%, bậc ≥5) — một lần may mắn không thành "thuộc". -->
-            <span class="text-slate-500 whitespace-nowrap" title="Đã làm ≥ 8 lần, sai ≤ 10%, bậc ôn ≥ 5">
+            <!-- "nắm chắc" ≠ nút "Đã thuộc" trong Kiểm tra: đây là mức nghỉ hưu,
+                 lấy ngưỡng từ RETIRE — một lần may mắn không thành "thuộc". -->
+            <span class="text-slate-500 whitespace-nowrap"
+                  :title="'Đã làm ≥ ' + RETIRE.n + ' lần, sai ≤ ' + Math.round(RETIRE.err * 100) + '%, bậc ôn ≥ ' + RETIRE.box">
               <span x-text="modeRetired"></span>/<span x-text="modeItems.length"></span> đã nắm chắc
             </span>
           </div>
@@ -901,8 +941,8 @@
     <div class="space-y-5">
       <!-- Lọc loại nội dung + bật chi tiết. Class ở KINDS là literal để Tailwind quét thấy. -->
       <div class="flex flex-wrap items-center gap-1.5">
-        <template x-for="kd in KINDS" :key="kd.k">
-          <button @click="toggleShow(kd.k)" :class="show[kd.k] ? kd.on : kd.off"
+        <template x-for="kd in kinds" :key="kd.k">
+          <button @click="toggleShow(kd.k)" :class="filt[kd.k] ? kd.on : kd.off"
                   class="px-2.5 py-1 text-xs font-medium rounded-full border transition-colors" x-text="kd.t"></button>
         </template>
         <label class="ml-auto flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer select-none">
@@ -917,7 +957,7 @@
       <template x-for="sec in scopedSummary" :key="sec.concept">
         <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           <div class="px-5 py-3 bg-indigo-50 border-b border-indigo-100">
-            <h3 class="font-semibold text-indigo-900" x-text="conceptName(sec.concept)"></h3>
+            <h3 class="text-lg font-bold text-indigo-900" x-text="conceptName(sec.concept)"></h3>
           </div>
 
           <!-- Ý lớn: một câu, chữ to, để nhớ được cả mục -->
@@ -1006,14 +1046,14 @@
               <div class="flex items-center gap-2 px-4 py-2 bg-slate-50 border-b border-slate-200">
                 <span class="w-2 h-2 rounded-full shrink-0"
                       :class="branchStat(leaf.id).wrong > 0 ? 'bg-rose-400' : 'bg-indigo-400'"></span>
-                <h4 class="text-sm font-semibold text-slate-800" x-text="leaf.en"></h4>
-                <span class="ml-auto text-[11px] text-slate-400" x-text="leaf.pages ? 'p.' + leaf.pages : ''"></span>
+                <h4 class="text-base font-bold text-slate-800" x-text="leaf.en"></h4>
+                <span class="ml-auto text-xs text-slate-400" x-text="leaf.pages ? 'p.' + leaf.pages : ''"></span>
               </div>
 
               <!-- từ vựng của lá -->
               <template x-if="show.gloss && tagged(sec.glossary, leaf.id).length">
               <div class="px-4 pt-3">
-              <p class="text-[11px] font-bold uppercase tracking-wide text-indigo-600 mb-1.5">📖 Từ vựng</p>
+              <p class="text-[13px] font-bold uppercase tracking-wider text-indigo-600 mb-1.5">📖 Từ vựng</p>
               <dl class="grid gap-x-3 gap-y-1.5 sm:grid-cols-2">
                 <template x-for="g in tagged(sec.glossary, leaf.id)" :key="g.term">
                   <div class="rounded-lg bg-indigo-50/60 border border-indigo-100 px-3 py-2">
@@ -1030,12 +1070,11 @@
               <!-- ý của lá -->
               <template x-if="show.facts && tagged(points(sec), leaf.id).length">
               <div class="px-4 pt-3">
-              <p class="text-[11px] font-bold uppercase tracking-wide text-sky-600 mb-1.5">✦ Điều cần nhớ</p>
+              <p class="text-[13px] font-bold uppercase tracking-wider text-sky-600 mb-1.5">✦ Điều cần nhớ</p>
               <div class="grid gap-2 sm:grid-cols-2">
                 <template x-for="(pt, i) in tagged(points(sec), leaf.id)" :key="i">
                   <div class="flex gap-2.5 rounded-lg border border-sky-200 bg-sky-50/40 p-3">
-                    <svg class="w-5 h-5 shrink-0 mt-0.5 text-sky-500"><use :href="'#i-' + (pt.icon || 'cube')"/></svg>
-                    <p class="text-sm text-slate-700 leading-snug flex-1" x-text="pt.t"></p>
+                    <p class="text-sm text-slate-700 leading-snug flex-1"><span class="font-semibold text-slate-900" x-text="lead(pt.t)[0]"></span><span x-text="lead(pt.t)[1]"></span></p>
                     <template x-if="pt.image"><img :src="'study/img/' + pt.image" alt="" class="w-16 shrink-0 self-start rounded border border-sky-200 bg-white object-contain"></template>
                   </div>
                 </template>
@@ -1047,11 +1086,10 @@
               <template x-if="show.list"><div>
               <template x-for="(ck, ci) in lists(sec, leaf.id)" :key="'l' + ci">
               <div class="px-4 pt-3">
-                <p class="text-[11px] font-bold uppercase tracking-wide text-emerald-700 mb-1.5">☑ <span x-text="ck.title"></span></p>
+                <p class="text-[13px] font-bold uppercase tracking-wider text-emerald-700 mb-1.5">☑ <span x-text="ck.title"></span></p>
                 <ol class="grid gap-1.5 sm:grid-cols-2">
                   <template x-for="(it, i) in ck.items" :key="i">
                     <li class="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50/60 px-2.5 py-1.5">
-                      <svg class="w-4 h-4 shrink-0 mt-0.5 text-emerald-600"><use :href="'#i-' + (it.icon || 'sparkle')"/></svg>
                       <div class="min-w-0 text-sm leading-snug">
                         <span class="font-semibold text-slate-900" x-text="it.sign"></span>
                         <template x-if="it.look_for"><span><span class="text-slate-500"> — </span><span class="text-slate-700" x-text="it.look_for"></span></span></template>
@@ -1068,7 +1106,7 @@
               <!-- ngộ nhận của lá -->
               <template x-if="show.watch && tagged(sec.watch_out, leaf.id).length">
               <div class="px-4 pt-3">
-                <p class="text-[11px] font-bold uppercase tracking-wide text-amber-600 mb-1.5">⚠ Dễ nhầm chỗ này</p>
+                <p class="text-[13px] font-bold uppercase tracking-wider text-amber-600 mb-1.5">⚠ Dễ nhầm chỗ này</p>
                 <div class="space-y-2">
                   <template x-for="(w, i) in tagged(sec.watch_out, leaf.id)" :key="i">
                     <div class="rounded-lg border border-amber-200 bg-amber-50 overflow-hidden">
@@ -1086,26 +1124,21 @@
               </div>
               </template>
 
-              <!-- thí nghiệm thuộc lá: có thể nhiều. Tóm tắt CẢ CÁCH LÀM (cần gì → làm gì →
-                   thấy gì), hình cắt từ trang sách đặt cạnh để liên tưởng. -->
+              <!-- thí nghiệm thuộc lá: có thể nhiều. Chỉ 1–2 câu tóm tắt cách làm + 1 câu
+                   kết quả (không liệt kê dụng cụ/bước), hình cắt rộng từ trang sách đặt cạnh. -->
               <template x-if="show.exp"><div>
               <template x-for="(ex, ei) in exps(sec, leaf.id)" :key="'e' + ei">
               <div class="px-4 pt-3">
-                <p class="text-[11px] font-bold uppercase tracking-wide text-violet-600 mb-1.5">🔬 <span x-text="ex.title || 'Thí nghiệm trong sách'"></span><span x-show="ex.page" class="font-normal normal-case text-slate-400" x-text="' · p.' + ex.page"></span></p>
-                <div class="rounded-lg border border-violet-200 bg-violet-50 px-3 py-2.5 flex gap-3">
-                  <div class="min-w-0 flex-1 text-sm space-y-1">
-                    <p x-show="ex.need" class="text-slate-600"><span class="font-semibold text-violet-800">Cần:</span> <span x-text="ex.need"></span></p>
-                    <ol x-show="(ex.steps || []).length" class="list-decimal pl-5 text-slate-700 space-y-0.5">
-                      <template x-for="(st, si) in (ex.steps || [])" :key="si"><li x-text="st"></li></template>
-                    </ol>
+                <p class="text-[13px] font-bold uppercase tracking-wider text-violet-600 mb-1.5">🔬 <span x-text="ex.title || 'Thí nghiệm trong sách'"></span><span x-show="ex.page" class="font-normal normal-case text-slate-400" x-text="' · p.' + ex.page"></span></p>
+                <div class="rounded-lg border border-violet-200 bg-violet-50 px-3 py-2.5 flex gap-3 items-start">
+                  <div class="min-w-0 flex-1 text-sm space-y-1.5">
+                    <p x-show="ex.summary" class="text-slate-700" x-text="ex.summary"></p>
                     <p x-show="ex.result" class="font-medium text-violet-900"><span class="font-semibold">Thấy:</span> <span x-text="ex.result"></span></p>
-                    <p x-show="detail && ex.activity" class="text-xs text-slate-500 italic" x-text="ex.activity"></p>
-                    <p x-show="!ex.steps && ex.what_it_shows" class="font-medium text-violet-900" x-text="ex.what_it_shows"></p>
                   </div>
                   <!-- x-if chứ không x-show: :src vẫn bind khi ẩn → trình duyệt tải "img/null" (404) -->
                   <template x-if="ex.image">
-                  <img :src="'study/img/' + ex.image" :alt="ex.title || ''"
-                       class="w-28 sm:w-36 shrink-0 self-start rounded-md border border-violet-200 bg-white object-contain">
+                  <img :src="'study/img/' + ex.image" :alt="ex.title || ''" loading="lazy"
+                       class="w-36 sm:w-52 max-h-56 shrink-0 rounded-md border border-violet-200 bg-white object-contain">
                   </template>
                 </div>
               </div>
@@ -1116,15 +1149,15 @@
               <template x-if="show.compare"><div>
               <template x-for="(cp, pi) in comps(sec, leaf.id)" :key="'c' + pi">
               <div class="px-4 pt-3">
-                <p class="text-[11px] font-bold uppercase tracking-wide text-slate-600 mb-1.5">⇄ <span x-text="cp.title || 'So sánh'"></span></p>
+                <p class="text-[13px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">⇄ <span x-text="cp.title || 'So sánh'"></span></p>
                 <div class="rounded-lg border border-slate-200 overflow-hidden">
-                  <div class="grid grid-cols-[5.5rem_1fr_1fr] text-xs font-semibold">
+                  <div class="grid grid-cols-[6.5rem_1fr_1fr] text-sm font-semibold">
                     <div class="bg-slate-100 px-2 py-2"></div>
                     <div class="bg-emerald-50 text-emerald-800 px-2 py-2 border-l border-slate-200" x-text="cp.label_a"></div>
                     <div class="bg-slate-50 text-slate-700 px-2 py-2 border-l border-slate-200" x-text="cp.label_b"></div>
                   </div>
                   <template x-for="(r, i) in cp.rows" :key="i">
-                    <div class="grid grid-cols-[5.5rem_1fr_1fr] text-xs border-t border-slate-200">
+                    <div class="grid grid-cols-[6.5rem_1fr_1fr] text-sm border-t border-slate-200">
                       <div class="bg-slate-50 px-2 py-2 font-medium text-slate-600" x-text="r.aspect"></div>
                       <div class="px-2 py-2 text-slate-700 border-l border-slate-200" x-text="r.a"></div>
                       <div class="px-2 py-2 text-slate-500 border-l border-slate-200" x-text="r.b"></div>
@@ -1142,15 +1175,15 @@
                chưa gắn nhãn — để dữ liệu cũ vẫn hiện đủ.                       -->
           <template x-for="(cp, pi) in (show.compare ? secComps(sec) : [])" :key="'sc' + pi">
           <div class="px-5 pb-4">
-            <p class="text-[11px] font-bold uppercase tracking-wide text-slate-600 mb-1.5">⇄ So sánh</p>
+            <p class="text-[13px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">⇄ So sánh</p>
             <div class="rounded-lg border border-slate-200 overflow-hidden">
-              <div class="grid grid-cols-[5.5rem_1fr_1fr] text-xs font-semibold">
+              <div class="grid grid-cols-[6.5rem_1fr_1fr] text-sm font-semibold">
                 <div class="bg-slate-100 px-2 py-2"></div>
                 <div class="bg-emerald-50 text-emerald-800 px-2 py-2 border-l border-slate-200" x-text="cp.label_a"></div>
                 <div class="bg-slate-50 text-slate-700 px-2 py-2 border-l border-slate-200" x-text="cp.label_b"></div>
               </div>
               <template x-for="(r, i) in cp.rows" :key="i">
-                <div class="grid grid-cols-[5.5rem_1fr_1fr] text-xs border-t border-slate-200">
+                <div class="grid grid-cols-[6.5rem_1fr_1fr] text-sm border-t border-slate-200">
                   <div class="bg-slate-50 px-2 py-2 font-medium text-slate-600" x-text="r.aspect"></div>
                   <div class="px-2 py-2 text-slate-700 border-l border-slate-200" x-text="r.a"></div>
                   <div class="px-2 py-2 text-slate-500 border-l border-slate-200" x-text="r.b"></div>
@@ -1178,8 +1211,7 @@
             <div class="grid gap-2 sm:grid-cols-2">
               <template x-for="(pt, i) in untagged(sec).points" :key="i">
                 <div class="flex gap-2.5 rounded-lg border border-slate-200 p-3">
-                  <svg class="w-5 h-5 shrink-0 mt-0.5 text-indigo-500"><use :href="'#i-' + (pt.icon || 'cube')"/></svg>
-                  <p class="text-sm text-slate-700 leading-snug" x-text="pt.t"></p>
+                  <p class="text-sm text-slate-700 leading-snug"><span class="font-semibold text-slate-900" x-text="lead(pt.t)[0]"></span><span x-text="lead(pt.t)[1]"></span></p>
                 </div>
               </template>
             </div>
@@ -1190,7 +1222,6 @@
               <ol class="space-y-2">
                 <template x-for="(it, i) in sec.checklist.items" :key="i">
                   <li class="flex gap-3 rounded-lg border border-emerald-200 bg-emerald-50/60 px-3 py-2.5">
-                    <svg class="w-6 h-6 shrink-0 text-emerald-600"><use :href="'#i-' + (it.icon || 'sparkle')"/></svg>
                     <div class="min-w-0">
                       <p class="text-sm font-semibold text-slate-900" x-text="it.sign"></p>
                       <p class="text-sm text-slate-700" x-text="it.look_for"></p>
