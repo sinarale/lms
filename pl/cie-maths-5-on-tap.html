@@ -7,7 +7,7 @@
   <title>Ôn tập · CIE Maths 5</title>
   <!-- CSS dựng sẵn lúc build (tên file có hash). Thiếu Node thì builder tự
        thay dòng này bằng Tailwind CDN. -->
-  <link rel="stylesheet" href="../assets/tw.3b9ce75c.css">
+  <link rel="stylesheet" href="../assets/tw.8a77cb66.css">
   <script defer src="../assets/alpine.63d2636a.js"></script>
   <script>
     // ── Vỏ tĩnh, nội dung nạp bằng fetch ────────────────────────────────────
@@ -39,7 +39,10 @@
         // Không chọn chip nào (mặc định) nghĩa là xem tất cả — xem getter `show`.
         filt: JSON.parse(localStorage.getItem('lms_pick') || 'null') || { gloss: false, facts: false, list: false, watch: false, exp: false, compare: false },
         detail: localStorage.getItem('lms_detail') === '1',
-        scope: null,            // chủ đề đang học; null = cả môn
+        // Chủ đề đang học. Bỏ mục "cả môn" nên sau khi nạp xong đây LUÔN là một
+        // unit cụ thể — xem pickFirstUnit(). Giữ null lúc khởi tạo vì cây chủ đề
+        // chưa có gì để chọn.
+        scope: null,
         navOpen: false,         // ngăn kéo cây trên màn hình hẹp
         queue: [], at: 0, picked: null, answered: false, wrongAgain: 0,
         log: [], shownAt: 0,
@@ -49,6 +52,7 @@
             const r = await fetch('study/cie-maths-5.json', { headers: { accept: 'application/json' } });
             if (!r.ok) throw new Error('HTTP ' + r.status);
             this.data = await r.json();
+            this.pickFirstUnit();   // không còn mục "cả môn"
           } catch (e) {
             this.err = 'Không tải được học liệu ôn tập.';
             this.ready = true;
@@ -140,6 +144,41 @@
         skipKnown: localStorage.getItem('lms_skip_known') === '1',
         toggleSkip() { this.skipKnown = !this.skipKnown; localStorage.setItem('lms_skip_known', this.skipKnown ? '1' : '0'); },
         showList: false,
+        // Ô tìm theo từ khoá trong phần tóm tắt. Lọc TỪNG MẨU nội dung, không
+        // lọc cả mục: gõ "oxygen" thì chỉ những từ vựng / ý / hàng bảng có chữ
+        // đó còn lại, mục nào không còn gì thì tự ẩn.
+        // ⚠ ĐỪNG đặt tên `q`: đã có getter q() trả về câu hỏi đang hiện của phần
+        // trắc nghiệm. Khoá sau ghi đè khoá trước trong object literal.
+        kw: '',
+        get qq() { return (this.kw || '').trim().toLowerCase(); },
+        // Số mẩu nội dung còn lại sau khi lọc, chỉ để hiện dòng "không có mục nào".
+        get nHits() {
+          let n = 0;
+          for (const sec of this.scopedSummary) {
+            n += this.fq(sec.topics || [], 'title', 'def', 'rules', 'subtitle').length;
+            n += this.fq(sec.glossary || [], 'term', 'def', 'example').length;
+            for (const leaf of this.leavesOf(sec)) {
+              n += this.tagged(this.points(sec), leaf.id).length
+                 + this.tagged(sec.glossary, leaf.id).length
+                 + this.tagged(sec.watch_out, leaf.id).length
+                 + this.exps(sec, leaf.id).length + this.comps(sec, leaf.id).length
+                 + this.tagged(sec.checklists, leaf.id).length;
+            }
+          }
+          return n;
+        },
+        hit(...parts) {
+          if (!this.qq) return true;
+          return parts.filter(Boolean).join(' ').toLowerCase().includes(this.qq);
+        },
+        // Lọc một mảng khối theo từ khoá; khối nào không khớp thì biến mất.
+        fq(arr, ...keys) {
+          if (!this.qq) return arr || [];
+          return (arr || []).filter(x => this.hit(...keys.map(k => {
+            const v = x[k];
+            return Array.isArray(v) ? v.map(y => typeof y === 'object' ? Object.values(y).join(' ') : y).join(' ') : v;
+          })));
+        },
         // Nguồn của MỌI lượt chọn câu: bật lọc thì mục đã nắm chắc đứng ngoài hẳn.
         pool(kind) {
           const all = kind === 'cards' ? this.scopedCards : this.scopedQuiz;
@@ -204,6 +243,7 @@
           { k: 'watch',   t: '⚠ Dễ nhầm',      on: 'bg-amber-500 text-white border-amber-500',    off: 'bg-white text-amber-700 border-amber-300' },
           { k: 'exp',     t: '🔬 Thí nghiệm',  on: 'bg-violet-600 text-white border-violet-600',  off: 'bg-white text-violet-700 border-violet-300' },
           { k: 'worked',  t: '🧮 Bài mẫu',     on: 'bg-teal-600 text-white border-teal-600',      off: 'bg-white text-teal-700 border-teal-300' },
+          { k: 'topics',  t: '① Kiến thức học', on: 'bg-orange-600 text-white border-orange-600', off: 'bg-white text-orange-700 border-orange-300' },
           { k: 'compare', t: '⇄ So sánh',      on: 'bg-slate-700 text-white border-slate-700',    off: 'bg-white text-slate-700 border-slate-300' },
         ],
         // ⚠ ĐỪNG đặt tên state này là `pick`: đã có method pick(c) chọn đáp án
@@ -220,7 +260,7 @@
         // nên đổi phạm vi ở cây bên trái là chip tự hiện/ẩn theo.
         hasKind(k) {
           const F = { gloss: 'glossary', facts: null, list: 'checklists',
-                      watch: 'watch_out', exp: 'experiments', worked: 'worked', compare: 'compares' };
+                      watch: 'watch_out', exp: 'experiments', worked: 'worked', topics: 'topics', compare: 'compares' };
           return this.scopedSummary.some(sec =>
             (k === 'facts' ? this.points(sec) : (sec[F[k]] || [])).length);
         },
@@ -239,6 +279,19 @@
           return out;
         },
         inScope(cid) { return !this.scope || this.subtree(this.scope).has(cid); },
+        // Không còn mục "cả môn": mở trang là vào thẳng unit đầu tiên.
+        pickFirstUnit() {
+          if (this.scope) return;
+          const u = this.units;
+          if (!u.length) return;
+          // Unit ĐẦU TIÊN CÓ NỘI DUNG, không phải unit số 1: môn Science mới soạn
+          // Unit 2, mở vào Unit 1 rỗng thì trang trông như hỏng.
+          const has = new Set((this.data?.summary || []).map(x => x.concept));
+          const inside = (id) => has.has(id) || this.children(id).some(k => has.has(k.id));
+          const pick = u.find(x => inside(x.id)) || u[0];
+          this.scope = pick.id;
+          this.openMap[pick.id] = true;
+        },
         setScope(cid) {
           this.scope = cid;
           this.navOpen = false;
@@ -262,6 +315,11 @@
         // Dùng ?. ở mọi getter: Alpine ĐÁNH GIÁ biểu thức trong x-show dù đang
         // ẩn, nên cây bên trái chạy trước khi fetch xong và data vẫn là null.
         children(pid) { return (this.data?.concepts || []).filter(c => c.parent === pid); },
+        // Con hiện trên menu chỉ khi bản thân nó có mục tóm tắt riêng.
+        navKids(pid) {
+          const has = new Set((this.data?.summary || []).map(x => x.concept));
+          return this.children(pid).filter(c => has.has(c.id));
+        },
         get roots() { return this.children(null); },
         // "Unit" = tầng ngay dưới gốc. Nếu cây chỉ có một gốc (một unit duy
         // nhất) thì lấy chính các con của nó, để menu không hiện đúng một dòng.
@@ -301,16 +359,31 @@
         // để dữ liệu môn khác chưa gen lại vẫn hiện.
         arr(sec, many, one) { const a = sec[many]; if (Array.isArray(a)) return a; const o = sec[one]; return o ? [o] : []; },
         lists(sec, leafId)  { return this.arr(sec, 'checklists', 'checklist').filter(x => x.concept === leafId); },
-        exps(sec, leafId)   { return this.arr(sec, 'experiments', 'from_the_book').filter(x => x.concept === leafId); },
-        works(sec, leafId)  { return this.arr(sec, 'worked', null).filter(x => x.concept === leafId); },
-        comps(sec, leafId)  { return this.arr(sec, 'compares', 'compare').filter(x => x.concept === leafId); },
+        exps(sec, leafId)   { return this.fq(this.arr(sec, 'experiments', 'from_the_book').filter(x => x.concept === leafId), 'title','summary','result'); },
+        works(sec, leafId)   { return this.fq(this.arr(sec, 'worked', null).filter(x => x.concept === leafId), 'title','problem','answer','steps'); },
+        tops(sec)           { return this.fq(sec.topics || [], 'title', 'def', 'rules', 'subtitle'); },
+        // Một dòng ví dụ "calc" tách thành nhãn | giá trị để CĂN THẲNG CỘT.
+        // Trước đây đổ vào lưới 2 cột theo thứ tự, dòng dài xuống dòng là hai
+        // cột lệch nhau và không có kẻ nào để bám — đọc thành vô nghĩa.
+        calcRow(line) {
+          const i = String(line || '').indexOf(': ');
+          return i > 0 && i < 32 ? [line.slice(0, i), line.slice(i + 2)] : [null, line];
+        },
+        comps(sec, leafId)   { return this.fq(this.arr(sec, 'compares', 'compare').filter(x => x.concept === leafId), 'title','label_a','label_b','rows'); },
         // Khối cấp MỤC = không gắn lá nào
         secLists(sec) { return this.arr(sec, 'checklists', 'checklist').filter(x => !x.concept); },
         secExps(sec)  { return this.arr(sec, 'experiments', 'from_the_book').filter(x => !x.concept); },
         secComps(sec) { return this.arr(sec, 'compares', 'compare').filter(x => !x.concept); },
         // Lá của một mục = con trực tiếp của chủ đề mục đó, theo thứ tự cây
         leavesOf(sec) { return this.children(sec.concept); },
-        tagged(list, leafId) { return (list || []).filter(x => x && x.concept === leafId); },
+        // Lọc theo lá VÀ theo ô tìm. Mọi khối trong tóm tắt đi qua đây nên chỉ
+        // cần bọc một chỗ; khối nào lọc hết thì phần bao ngoài tự ẩn vì
+        // template dùng `.length` để quyết định có vẽ hay không.
+        tagged(list, leafId) {
+          return this.fq((list || []).filter(x => x && x.concept === leafId),
+                         't', 'term', 'def', 'example', 'title', 'wrong', 'right',
+                         'problem', 'answer', 'summary', 'result', 'rules', 'items', 'rows', 'lines');
+        },
         // Mọi thứ KHÔNG gắn vào lá nào của mục — dữ liệu cũ, hoặc ý thuộc cả mục
         untagged(sec) {
           const ids = new Set(this.leavesOf(sec).map(l => l.id));
@@ -669,6 +742,217 @@
       <rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></g>
     <g id="i-bubbles" fill="none" stroke="currentColor" stroke-width="1.8">
       <circle cx="9" cy="14" r="3.5"/><circle cx="16" cy="9" r="2.5"/><circle cx="16.5" cy="16.5" r="1.5"/></g>
+
+    <!-- ── Hình minh hoạ cho môn Toán ────────────────────────────────────────
+         Vẽ tay, không phải icon trang trí: mỗi hình nói đúng một ý (9 chấm xếp
+         vuông = số chính phương, khối lập phương = số lập phương, hai vòng giao
+         nhau = ước chung). Đây là lý do KHÔNG dùng lại bộ icon của Science.
+         viewBox 0 0 24 24 cho mọi hình để đổi cỡ chỉ bằng class.            -->
+    <g id="m-dots9" fill="currentColor">
+      <circle cx="7" cy="7" r="1.7"/><circle cx="12" cy="7" r="1.7"/><circle cx="17" cy="7" r="1.7"/>
+      <circle cx="7" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="17" cy="12" r="1.7"/>
+      <circle cx="7" cy="17" r="1.7"/><circle cx="12" cy="17" r="1.7"/><circle cx="17" cy="17" r="1.7"/></g>
+    <g id="m-cube" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></g>
+    <g id="m-grid" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="3" y="7" width="18" height="10" rx="1"/><path d="M9 7v10M15 7v10M3 11h18"/></g>
+    <g id="m-shift" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 8L4 12l5 4M15 8l5 4-5 4"/><path d="M12 5v14" stroke-dasharray="2 2"/></g>
+    <g id="m-split" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="4" rx="1"/><path d="M12 8v3M6 11h12M6 11v3M12 11v3M18 11v3"/>
+      <rect x="3.5" y="14" width="5" height="5" rx="1"/><rect x="9.5" y="14" width="5" height="5" rx="1"/><rect x="15.5" y="14" width="5" height="5" rx="1"/></g>
+    <g id="m-word" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21l3-4M7 9h10M7 13h6"/></g>
+    <g id="m-chain" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+      <path d="M7 12h3M14 12h3"/></g>
+    <g id="m-table" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="3" y="6" width="18" height="12" rx="1"/><path d="M3 12h18M9 6v12M15 6v12"/></g>
+    <g id="m-venn" fill="none" stroke="currentColor" stroke-width="1.6">
+      <circle cx="9.5" cy="12" r="6"/><circle cx="14.5" cy="12" r="6"/></g>
+    <g id="m-digit" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="6" y="4" width="12" height="16" rx="2"/><path d="M10 9l2-1.5V17M9.5 17h5"/></g>
+    <g id="m-point" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M4 17h4M16 17h4"/><circle cx="12" cy="16.5" r="1.8" fill="currentColor" stroke="none"/></g>
+    <g id="m-parts" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="3" y="9" width="18" height="6" rx="1"/><path d="M6.6 9v6M10.2 9v6M13.8 9v6M17.4 9v6"/>
+      <rect x="3" y="9" width="3.6" height="6" fill="currentColor" stroke="none" opacity="0.35"/></g>
+    <g id="m-equal" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <path d="M5 10h14M5 14h14"/></g>
+    <!-- Thêm cho Toán: mỗi khái niệm MỘT hình riêng. Dùng chung một hình cho hai
+         khái niệm khác nhau thì hình thôi không còn nghĩa gì — đã dính: "shift"
+         từng dùng cho cả nhân/chia, range và difference.                      -->
+    <g id="m-bars" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M4 20V14M9 20V8M14 20V11M19 20V16"/>
+      <rect x="7.4" y="6.6" width="3.2" height="3" rx="0.6" fill="currentColor" stroke="none"/></g>
+    <g id="m-level" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M5 20V9M10 20V15M15 20V6M20 20V17"/><path d="M3 13h18" stroke-dasharray="2.5 2"/></g>
+    <g id="m-span" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M5 6v12M19 6v12"/><path d="M7 12h10m0 0l-2.5-2.5M17 12l-2.5 2.5M7 12l2.5-2.5M7 12l2.5 2.5"/></g>
+    <g id="m-nline" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M2 12h20M6 9.5v5M18 9.5v5"/><path d="M12 8v8"/>
+      <path d="M4 6h2" stroke-width="2"/><path d="M18 6h2M19 5v2" stroke-width="2"/></g>
+    <g id="m-approx" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+      <path d="M4 9.5c2-2.5 4 2.5 6 0s4 2.5 6 0 4 2.5 4 0"/>
+      <path d="M4 15.5c2-2.5 4 2.5 6 0s4 2.5 6 0 4 2.5 4 0"/></g>
+    <g id="m-gap" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M2 16h20"/><circle cx="6" cy="16" r="2" fill="currentColor" stroke="none"/>
+      <circle cx="18" cy="16" r="2" fill="currentColor" stroke="none"/>
+      <path d="M6 10h12m0 0l-2-2m2 2l-2 2"/></g>
+    <g id="m-snap" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M3 18h18M6 18v-3M12 18v-3M18 18v-3"/>
+      <circle cx="10" cy="8" r="1.8" fill="currentColor" stroke="none"/>
+      <path d="M11.4 8.7l1.6 3m0 0l-1.5-.4M13 11.7l.4-1.5"/></g>
+    <g id="m-swap" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="13" width="7" height="7" rx="1.5"/>
+      <path d="M12 7h6m0 0l-2-2m2 2l-2 2M12 17H6m0 0l2-2m-2 2l2 2"/></g>
+    <g id="m-order" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M4 7h10M4 12h7M4 17h13"/><path d="M19 7v10m0 0l-2-2m2 2l2-2"/></g>
+    <g id="m-compare" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="6" width="8" height="12" rx="1.5"/><rect x="13" y="6" width="8" height="12" rx="1.5"/>
+      <path d="M5.5 15V10M8.5 15v-2M15.5 15v-3M18.5 15V9"/></g>
+    <!-- Hình cho các unit hình học, phân số, thống kê. Vẫn một khái niệm một hình. -->
+    <g id="m-quad" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M4 7h13l3 10H6z"/><path d="M6 17L17 7" stroke-dasharray="2 2"/></g>
+    <g id="m-circle" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>
+      <path d="M12 12h8"/><path d="M4 12h8" stroke-dasharray="2 2"/></g>
+    <g id="m-rotate" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 12a8 8 0 11-3-6.2"/><path d="M20 4v4h-4"/>
+      <rect x="9.5" y="9.5" width="5" height="5" rx="0.8"/></g>
+    <g id="m-fraction" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="8"/><path d="M12 4v8l6 5"/>
+      <path d="M12 4a8 8 0 016 13.2L12 12z" fill="currentColor" stroke="none" opacity="0.35"/></g>
+    <g id="m-percent" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <circle cx="7.5" cy="7.5" r="2.6"/><circle cx="16.5" cy="16.5" r="2.6"/><path d="M18.5 5.5l-13 13"/></g>
+    <g id="m-area" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="3" y="6" width="18" height="12" rx="1"/><path d="M9 6v12M15 6v12M3 12h18"/>
+      <rect x="3" y="6" width="6" height="6" fill="currentColor" stroke="none" opacity="0.3"/></g>
+    <g id="m-triangle" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M4 19h16L12 5z"/><path d="M12 5v14" stroke-dasharray="2 2"/>
+      <path d="M6.6 19v-1.6h1.6"/></g>
+    <g id="m-clock" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3.2 2"/></g>
+    <g id="m-dice" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="4" y="4" width="16" height="16" rx="3"/>
+      <circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>
+      <circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" stroke="none"/></g>
+    <g id="m-scale" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M2 16h20"/><path d="M2 16l3-6 3 6M16 16l3-6 3 6"/><path d="M12 6v10M8 6h8"/></g>
+    <g id="m-net" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="9" y="3" width="6" height="6"/><rect x="3" y="9" width="6" height="6"/>
+      <rect x="9" y="9" width="6" height="6"/><rect x="15" y="9" width="6" height="6"/>
+      <rect x="9" y="15" width="6" height="6"/></g>
+    <g id="m-jug" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M6 5h10v14a2 2 0 01-2 2H8a2 2 0 01-2-2z"/><path d="M16 8h3v5h-3"/>
+      <path d="M6 14h10" /><path d="M6 14h10v5a2 2 0 01-2 2H8a2 2 0 01-2-2z" fill="currentColor" stroke="none" opacity="0.3"/></g>
+    <g id="m-ratio" fill="none" stroke="currentColor" stroke-width="1.6">
+      <circle cx="5" cy="9" r="2"/><circle cx="5" cy="15" r="2"/>
+      <circle cx="19" cy="12" r="2"/>
+      <circle cx="12" cy="10" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="14" r="0.9" fill="currentColor" stroke="none"/></g>
+    <g id="m-angle" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M4 19h16M4 19L17 6"/><path d="M11 19a7 7 0 00-1.6-4.4" stroke-dasharray="2 2"/></g>
+    <g id="m-protractor" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <path d="M3 18a9 9 0 0118 0z"/><path d="M6 18a6 6 0 0112 0" opacity="0.7"/>
+      <path d="M12 18V9M7.6 18l1.6-2.6M16.4 18l-1.6-2.6M9.4 18l.8-1.4M14.6 18l-.8-1.4"/></g>
+    <g id="m-pie" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="8"/><path d="M12 12V4M12 12l7 4"/>
+      <path d="M12 4a8 8 0 017 12z" fill="currentColor" stroke="none" opacity="0.3"/></g>
+    <g id="m-linegraph" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-7"/></g>
+    <g id="m-scatter" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M4 4v16h16"/><path d="M6.5 17.5L18.5 6.5"/>
+      <circle cx="8" cy="16" r="1.2" fill="currentColor" stroke="none"/>
+      <circle cx="11" cy="12.4" r="1.2" fill="currentColor" stroke="none"/>
+      <circle cx="14" cy="11.4" r="1.2" fill="currentColor" stroke="none"/>
+      <circle cx="17" cy="7" r="1.2" fill="currentColor" stroke="none"/></g>
+    <g id="m-axes" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M12 3v18M3 12h18"/><path d="M6 9h.01M9 6h.01"/>
+      <circle cx="17" cy="7" r="1.5" fill="currentColor" stroke="none"/></g>
+    <g id="m-mirror" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M12 3v18" stroke-dasharray="2 2"/><path d="M9 8L4 12l5 4z"/><path d="M15 8l5 4-5 4z"/></g>
+    <g id="m-translate" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="13" width="7" height="7" rx="1"/>
+      <path d="M10.5 8.5l5 5m0 0l-2.6-.4M15.5 13.5l-.4-2.6"/></g>
+    <g id="m-divide" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <path d="M5 12h14"/><circle cx="12" cy="7" r="1.5" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="17" r="1.5" fill="currentColor" stroke="none"/></g>
+    <g id="m-times" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <path d="M6 6l12 12M18 6L6 18"/></g>
+    <!-- Đợt 3: hình cho hình học phẳng/khối, thống kê, phép biến hình. -->
+    <g id="m-quadmarks" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="3" y="7" width="18" height="10"/><path d="M4.5 8.5h2v2"/>
+      <path d="M11 6.4v1.2M11 16.4v1.2M2.4 11.5h1.2M20.4 11.5h1.2"/></g>
+    <g id="m-quadset" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="2.5" y="8" width="8" height="8"/><path d="M15 8h7l-2.5 8h-7z"/>
+      <path d="M6.5 8v8" stroke-dasharray="2 2" opacity="0.8"/></g>
+    <g id="m-compass" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v3M9.5 6L6 20M14.5 6L18 20"/><circle cx="12" cy="4" r="1.2"/>
+      <path d="M7 15a9 9 0 0110 0" stroke-dasharray="2 2"/></g>
+    <g id="m-rotorder" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="9" y="9" width="6" height="6"/>
+      <circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/>
+      <path d="M12 3.2a8.8 8.8 0 018.8 8.8 8.8 8.8 0 01-8.8 8.8 8.8 8.8 0 01-8.8-8.8"
+            stroke-width="1.3" stroke-dasharray="3 2.4"/>
+      <path d="M9.4 5.6L12 3.2l2.6 2.4"/></g>
+    <g id="m-trigrid" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">
+      <path d="M3 4h18v16H3z" opacity="0.45"/><path d="M9 4v16M15 4v16M3 9h18M3 14.5h18" opacity="0.45"/>
+      <path d="M4 19h14L4 6z" stroke-width="1.8"/>
+      <path d="M4 6v13h5z" fill="currentColor" stroke="none" opacity="0.25"/></g>
+    <g id="m-halfrect" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="3" y="6" width="18" height="12"/><path d="M3 18L21 6"/>
+      <path d="M3 6h18L3 18z" fill="currentColor" stroke="none" opacity="0.25"/></g>
+    <g id="m-prism" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+      <path d="M7 18L11 5l4 13z"/><path d="M11 5l6 2 4 11H15M7 18l6 2 8-2"/>
+      <path d="M7 18L11 5l4 13z" fill="currentColor" stroke="none" opacity="0.28"/></g>
+    <g id="m-compound" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+      <path d="M3 20V11h8V4h10v16z"/><path d="M11 4v16" stroke-dasharray="2.5 2"/>
+      <path d="M5.5 15.5h3M15 8h3" stroke-width="1.3" opacity="0.75"/></g>
+    <g id="m-surface" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+      <rect x="9" y="3" width="6" height="5"/><rect x="3" y="8" width="6" height="5"/>
+      <rect x="9" y="8" width="6" height="5"/><rect x="15" y="8" width="6" height="5"/>
+      <rect x="9" y="13" width="6" height="5"/>
+      <path d="M9 8h6v5H9z" fill="currentColor" stroke="none" opacity="0.28"/>
+      <path d="M8 21h8m0 0l-2-1.5M16 21l-2 1.5"/></g>
+    <g id="m-trisum" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M3 19h18L12 4z"/>
+      <path d="M7.2 19a6 6 0 012.1-4.5" stroke-width="1.2"/>
+      <path d="M16.8 19a6 6 0 00-2.1-4.5" stroke-width="1.2"/>
+      <path d="M9.6 8.4a5 5 0 004.8 0" stroke-width="1.2"/></g>
+    <g id="m-tritypes" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+      <path d="M2 17h6L5 10z"/><path d="M9.5 17h6l-3-7z"/><path d="M17 17h6l-4.4-7z"/>
+      <path d="M3.3 13.8l.9.5M6.7 13.8l-.9.5M10.7 13.8l.9.5M14.3 13.8l-.9.5"/></g>
+    <g id="m-line180" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M2 17h20"/><path d="M12 17L6 7M12 17l7-8"/>
+      <path d="M8.4 17a5 5 0 00-1-2.9" stroke-dasharray="1.6 1.6"/>
+      <path d="M16 17a4.5 4.5 0 00-.9-2.7" stroke-dasharray="1.6 1.6"/></g>
+    <g id="m-dotplot" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M3 20h18M7 20v1.5M12 20v1.5M17 20v1.5"/>
+      <g fill="currentColor" stroke="none">
+        <circle cx="7" cy="17" r="1.3"/><circle cx="7" cy="13.6" r="1.3"/>
+        <circle cx="12" cy="17" r="1.3"/><circle cx="12" cy="13.6" r="1.3"/><circle cx="12" cy="10.2" r="1.3"/>
+        <circle cx="17" cy="17" r="1.3"/></g></g>
+    <g id="m-waffle" fill="none" stroke="currentColor" stroke-width="1.2">
+      <g stroke="currentColor">
+        <rect x="4" y="4" width="4" height="4"/><rect x="8" y="4" width="4" height="4"/>
+        <rect x="12" y="4" width="4" height="4"/><rect x="16" y="4" width="4" height="4"/>
+        <rect x="4" y="8" width="4" height="4"/><rect x="8" y="8" width="4" height="4"/>
+        <rect x="12" y="8" width="4" height="4"/><rect x="16" y="8" width="4" height="4"/>
+        <rect x="4" y="12" width="4" height="4"/><rect x="8" y="12" width="4" height="4"/>
+        <rect x="12" y="12" width="4" height="4"/><rect x="16" y="12" width="4" height="4"/></g>
+      <g fill="currentColor" stroke="none">
+        <rect x="4" y="4" width="4" height="4"/><rect x="8" y="4" width="4" height="4"/>
+        <rect x="12" y="4" width="4" height="4" opacity="0.45"/>
+        <rect x="4" y="8" width="4" height="4" opacity="0.45"/></g>
+      <path d="M4 19h3M10 19h3" stroke-linecap="round"/></g>
+    <g id="m-brackets" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <path d="M9 5a9 9 0 000 14M15 5a9 9 0 010 14"/>
+      <rect x="10.7" y="10.7" width="2.6" height="2.6" rx="0.5" fill="currentColor" stroke="none"/></g>
+    <g id="m-corres" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+      <path d="M2 10h6L5 4z"/><path d="M15 20h6l-3-6z"/>
+      <path d="M5 4l13 10M8 10l6 4M2 10l13 10" stroke-dasharray="2 2" opacity="0.75"/></g>
   </defs></svg>
 
 
@@ -726,17 +1010,20 @@
     <aside x-show="navOpen" x-cloak
            :class="navOpen ? 'fixed inset-y-0 left-0 w-72 z-30 overflow-y-auto shadow-xl' : ''"
            class="lg:!block lg:static lg:w-60 lg:shrink-0 lg:z-auto lg:shadow-none bg-white lg:bg-transparent p-4 lg:pl-0 lg:py-6">
+      <p class="text-xs font-bold uppercase tracking-wide text-slate-400 mb-1.5">Môn học</p>
+      <select onchange="if(this.value) location.href = this.value"
+              class="w-full mb-4 px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-sm text-slate-800">
+        <option value="cie-maths-5-on-tap.html" selected>CIE Maths 5</option>
+        <option value="cie-science-5-on-tap.html">CIE Science 5</option>
+      </select>
       <p class="text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">Phần học</p>
-      <button @click="setScope(null)"
-              :class="!scope ? 'bg-indigo-600 text-white' : 'text-slate-700 hover:bg-slate-100'"
-              class="w-full text-left px-2.5 py-1.5 rounded-lg text-sm font-medium">
-        Cả môn
-      </button>
-      <ul class="mt-1 space-y-0.5">
+      <!-- KHÔNG có mục "cả môn": học theo unit, không ôn cả chương trình một lúc.
+           scope vì thế luôn khác null sau khi nạp xong — xem init(). -->
+      <ul class="space-y-0.5">
         <template x-for="u in units" :key="u.id">
           <li>
             <div class="flex items-center gap-0.5">
-              <button @click="openMap[u.id] = !openMap[u.id]"
+              <button x-show="navKids(u.id).length" @click="openMap[u.id] = !openMap[u.id]"
                       class="shrink-0 p-1 text-indigo-500 hover:text-indigo-700"
                       :aria-label="'Mở ' + u.en">
                 <svg class="w-3.5 h-3.5 transition-transform duration-200"
@@ -752,7 +1039,7 @@
               </button>
             </div>
             <ul x-show="openMap[u.id]" x-cloak class="ml-5 border-l border-slate-200 pl-1.5 space-y-0.5">
-              <template x-for="sec in children(u.id)" :key="sec.id">
+              <template x-for="sec in navKids(u.id)" :key="sec.id">
                 <li>
                   <button @click="setScope(sec.id)"
                           :class="scope === sec.id ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:bg-slate-100'"
@@ -764,7 +1051,7 @@
                   </button>
                 </li>
               </template>
-              <li x-show="!children(u.id).length" x-cloak class="px-2 py-1.5 text-xs text-slate-400 italic">
+              <li x-show="!navKids(u.id).length" x-cloak class="px-2 py-1.5 text-xs text-slate-400 italic">
                 chưa chia mục
               </li>
             </ul>
@@ -1027,6 +1314,22 @@
          nằm sẵn ở đây.                                                        -->
     <template x-if="ready && data && mode === 'summary'">
     <div class="space-y-5">
+      <!-- Tìm theo từ khoá. Lọc từng mẩu nội dung chứ không lọc cả mục, nên gõ
+           "oxygen" là chỉ còn đúng những chỗ nhắc tới oxygen. -->
+      <div class="relative">
+        <input type="search" x-model="kw" placeholder="Tìm trong bài… (từ vựng, ý, ví dụ)"
+               class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 bg-white text-sm
+                      placeholder:text-slate-400 focus:outline-none focus:border-indigo-500">
+        <svg class="absolute left-2.5 top-2.5 w-4 h-4 text-slate-400" fill="none" stroke="currentColor"
+             stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/>
+        </svg>
+      </div>
+      <p x-show="qq && !nHits" x-cloak
+         class="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800">
+        Không có mục nào khớp «<span x-text="kw"></span>».
+      </p>
+
       <!-- Lọc loại nội dung + bật chi tiết. Class ở KINDS là literal để Tailwind quét thấy. -->
       <div class="flex flex-wrap items-center gap-1.5">
         <template x-for="kd in kinds" :key="kd.k">
@@ -1129,7 +1432,109 @@
                từ vựng → ý → checklist → ngộ nhận → thí nghiệm của riêng lá đó.
                Trải phẳng thì người đọc không thấy cấu trúc sách; xếp theo lá thì
                infographic và cây điều hướng nói cùng một ngôn ngữ.                -->
-          <template x-for="leaf in leavesOf(sec)" :key="leaf.id">
+          <!-- ── Kiến thức học (môn Toán) ────────────────────────────────────
+               Mỗi kiến thức MỘT THẺ ĐÁNH SỐ: quy tắc bên trái, ví dụ ngay bên
+               phải. Trước đây quy tắc nằm ở "Điều cần nhớ" còn ví dụ ở tận khối
+               "Bài mẫu" phía dưới — đọc phải nhảy qua lại, học sinh không nối
+               được hai thứ với nhau. Ví dụ có 3 dạng, xem study/SPEC.md.       -->
+          <template x-if="show.topics && tops(sec).length"><div class="px-5 pb-4 space-y-3">
+          <template x-for="(tp, ti) in tops(sec)" :key="'t' + ti">
+            <div class="rounded-xl border border-orange-200 overflow-hidden">
+              <div class="flex items-center gap-2 px-3 py-2 bg-orange-50 border-b border-orange-200">
+                <span class="shrink-0 w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold grid place-items-center"
+                      x-text="ti + 1"></span>
+                <h4 class="text-base font-bold text-orange-800 uppercase tracking-wide" x-text="tp.title"></h4>
+                <span x-show="tp.subtitle" class="text-xs text-orange-500 normal-case" x-text="'(' + tp.subtitle + ')'"></span>
+                <span class="ml-auto text-xs text-slate-400" x-text="tp.page ? 'p.' + tp.page : ''"></span>
+              </div>
+              <!-- Định nghĩa: infographic này để TỔNG HỢP kiến thức, không chỉ liệt kê
+                   nội dung sẽ thi — nên mỗi thẻ mở đầu bằng một câu "cái này là gì". -->
+              <p x-show="tp.def" class="px-3 pt-2.5 text-sm font-medium text-slate-900" x-text="tp.def"></p>
+              <div class="grid sm:grid-cols-2 gap-x-4 gap-y-2 px-3 py-2.5">
+                <div class="flex gap-3 self-start">
+                <template x-if="tp.figure">
+                  <svg viewBox="0 0 24 24" class="w-14 h-14 shrink-0 text-orange-400"><use :href="'#m-' + tp.figure"/></svg>
+                </template>
+                <ul class="space-y-1 text-sm text-slate-700 self-start">
+                  <template x-for="(r, ri) in (tp.rules || [])" :key="ri">
+                    <li class="flex gap-2"><span class="text-orange-400 shrink-0">•</span><span x-text="r"></span></li>
+                  </template>
+                </ul>
+                </div>
+                <!-- ví dụ: 3 dạng, class viết literal để Tailwind quét thấy -->
+                <template x-if="tp.example && tp.example.kind === 'calc'">
+                  <div class="rounded-lg border border-slate-200 overflow-hidden">
+                    <p x-show="tp.example.title" class="px-3 py-1.5 bg-slate-100 text-xs font-semibold text-slate-600" x-text="tp.example.title"></p>
+                    <table class="w-full text-sm tabular-nums text-slate-800">
+                      <tbody class="divide-y divide-slate-200">
+                        <template x-for="(ln, li) in tp.example.lines" :key="li">
+                          <tr class="align-top">
+                            <template x-if="calcRow(ln)[0]">
+                              <td class="w-2/5 px-3 py-1.5 bg-slate-50 text-slate-600" x-text="calcRow(ln)[0]"></td>
+                            </template>
+                            <td class="px-3 py-1.5" :colspan="calcRow(ln)[0] ? 1 : 2" x-text="calcRow(ln)[1]"></td>
+                          </tr>
+                        </template>
+                      </tbody>
+                    </table>
+                  </div>
+                </template>
+                <template x-if="tp.example && tp.example.kind === 'grid'">
+                  <div class="overflow-x-auto rounded-lg border border-slate-200">
+                    <table class="w-full text-center text-xs tabular-nums">
+                      <tbody>
+                        <template x-for="(row, ri) in tp.example.rows" :key="ri">
+                          <tr :class="ri === 0 ? 'bg-slate-100 font-semibold text-slate-600'
+                                     : (ri === tp.example.rows.length - 1 ? 'bg-orange-50 font-bold text-orange-700' : 'text-slate-700')">
+                            <template x-for="(cell, ci) in row" :key="ci">
+                              <td class="px-1 py-1 border border-slate-200 whitespace-nowrap" x-text="cell"></td>
+                            </template>
+                          </tr>
+                        </template>
+                      </tbody>
+                    </table>
+                  </div>
+                </template>
+                <template x-if="tp.example && tp.example.kind === 'ifthen'">
+                  <div class="space-y-1.5">
+                    <template x-for="(br, bi) in tp.example.branches" :key="bi">
+                      <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-1.5 text-sm">
+                        <p class="text-slate-800"><span x-text="br.when"></span>
+                          <span class="text-orange-500 font-bold"> → </span><span x-text="br.then"></span></p>
+                        <p x-show="br.eg" class="text-xs text-slate-500 tabular-nums" x-text="br.eg"></p>
+                      </div>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+          </div></template>
+
+          <!-- Từ vựng GỘP CHUNG cho mục có thẻ "kiến thức học": chia theo lá thì
+               tiêu đề lá lặp lại y hệt tiêu đề thẻ ở trên, đọc rất rối. -->
+          <template x-if="show.gloss && (sec.topics || []).length && fq(sec.glossary || [], 'term', 'def', 'example').length">
+          <div class="px-5 pb-4">
+            <p class="text-[13px] font-bold uppercase tracking-wider text-indigo-600 mb-1.5">📖 Từ vựng</p>
+            <dl class="grid sm:grid-cols-2 gap-2">
+              <template x-for="g in fq(sec.glossary || [], 'term', 'def', 'example')" :key="g.term">
+                <div class="rounded-lg border border-indigo-200 bg-indigo-50/40 px-3 py-2 flex gap-2.5">
+                  <template x-if="g.icon">
+                    <svg viewBox="0 0 24 24" class="w-7 h-7 shrink-0 mt-0.5 text-indigo-400"><use :href="'#m-' + g.icon"/></svg>
+                  </template>
+                  <div class="min-w-0">
+                  <dt class="text-sm font-semibold text-indigo-900"><span x-text="g.term"></span><button x-show="canSpeak" @click.stop="speak(g.term)" type="button" title="Đọc to"
+                      class="ml-1 align-middle text-indigo-400 hover:text-indigo-700">🔊</button></dt>
+                  <dd class="text-sm text-slate-700 leading-snug" x-text="g.def"></dd>
+                  <dd x-show="g.example" class="mt-0.5 text-xs text-slate-500 italic" x-text="g.example"></dd>
+                  </div>
+                </div>
+              </template>
+            </dl>
+          </div>
+          </template>
+
+          <template x-for="leaf in (tops(sec).length ? [] : leavesOf(sec))" :key="leaf.id">
             <div class="mx-5 mb-4 rounded-xl border border-slate-200 overflow-hidden">
               <div class="flex items-center gap-2 px-4 py-2 bg-slate-50 border-b border-slate-200">
                 <span class="w-2 h-2 rounded-full shrink-0"
@@ -1148,7 +1553,7 @@
                     <dt class="text-sm font-semibold text-indigo-900"><span x-text="g.term"></span><button x-show="canSpeak" @click.stop="speak(g.term)" type="button" title="Đọc to"
                         class="ml-1 inline-flex items-center justify-center w-6 h-6 rounded-full text-indigo-500 hover:bg-indigo-100 align-middle">🔊</button></dt>
                     <dd class="text-sm text-slate-700 leading-snug" x-text="g.def"></dd>
-                    <dd x-show="detail && g.example" class="mt-0.5 text-xs text-slate-500 italic" x-text="g.example"></dd>
+                    <dd x-show="g.example" class="mt-0.5 text-xs text-slate-500 italic" x-text="g.example"></dd>
                   </div>
                 </template>
               </dl>
