@@ -7,7 +7,7 @@
   <title>Tiếng Việt 5 — PL</title>
   <!-- CSS dựng sẵn lúc build (tên file có hash). Thiếu Node thì builder tự
        thay dòng này bằng Tailwind CDN. -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/tw.41de24b9.css">
   <script defer src="../assets/collapse.d0a27f2d.js"></script>
   <script defer src="../assets/alpine.63d2636a.js"></script>
   <style>
@@ -264,11 +264,23 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
           </svg>
         </a>
-        
         <div class="min-w-0 flex-1">
-          <h1 class="text-lg font-bold text-slate-900 truncate">Tiếng Việt 5</h1>
+          <!-- Tên môn `truncate`, link `shrink-0`: tên dài bao nhiêu cũng không
+               đẩy được link ra khỏi màn hình, và link không bao giờ chen làm tên
+               môn bị cắt sớm. -->
+          <div class="flex flex-wrap items-baseline gap-x-2 min-w-0">
+            <h1 class="text-lg font-bold text-slate-900 truncate">Tiếng Việt 5</h1>
+            
+            <a href="https://lms.vinschool.edu.vn/courses/80102/modules" target="_blank" rel="noopener noreferrer"
+               title="Mở trang Các học phần của môn này trên LMS (cần đăng nhập)"
+               class="shrink-0 text-xs text-indigo-400 hover:text-indigo-600 hover:underline whitespace-nowrap">Xem trang gốc ↗</a>
+            
+          </div>
           <p class="text-xs text-slate-500">PL · 4 tuần/bài · cập nhật 2026-09-04 18:01</p>
         </div>
+        <!-- Trên màn hẹp nút này xuống HÀNG RIÊNG (`w-full`), không thì nó ăn
+             bề ngang của tiêu đề và tên môn bị cắt còn "CIE ES…". -->
+        
       </div>
       <div class="mt-2 flex items-center gap-2">
         <div class="relative flex-1">
@@ -453,7 +465,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/pages/ngu-lieu-doc-tro-choi-dan-gian-keo-co" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -538,7 +550,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/discussion_topics/687863" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -614,7 +626,7 @@
                 <span title="Nguồn không cung cấp thời gian cho loại mục này — đây là thời điểm hệ thống ghi nhận lần đầu">➕ 26/08</span>
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/quizzes/2172580" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -705,7 +717,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/pages/ngu-lieu-doc-tieng-hat-nay-mam" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -808,7 +820,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/discussion_topics/687892" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -887,7 +899,7 @@
                 <span title="Nguồn không cung cấp thời gian cho loại mục này — đây là thời điểm hệ thống ghi nhận lần đầu">➕ 26/08</span>
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/quizzes/2172581" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -976,7 +988,7 @@
                 <span title="Nguồn không cung cấp thời gian cho loại mục này — đây là thời điểm hệ thống ghi nhận lần đầu">➕ 26/08</span>
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/quizzes/2172579" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -1087,7 +1099,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/assignments/2939016" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -1168,7 +1180,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/discussion_topics/678611" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -1302,7 +1314,7 @@
                 <span title="Nguồn không cung cấp thời gian cho loại mục này — đây là thời điểm hệ thống ghi nhận lần đầu">➕ 25/08</span>
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/quizzes/2136495" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -1387,7 +1399,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/assignments/2939017" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -1482,7 +1494,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/discussion_topics/678612" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -1558,7 +1570,7 @@
                 <span title="Nguồn không cung cấp thời gian cho loại mục này — đây là thời điểm hệ thống ghi nhận lần đầu">➕ 25/08</span>
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/quizzes/2136496" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -1743,7 +1755,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/assignments/2650926" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -1821,7 +1833,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/pages/ngu-lieu-doc-thanh-am-cua-gio" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -1906,7 +1918,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/discussion_topics/664736" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -1994,7 +2006,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/assignments/2650924" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -2075,7 +2087,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/pages/ngu-lieu-doc-canh-dong-hoa" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -2163,7 +2175,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/discussion_topics/664739" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -2253,7 +2265,7 @@
                 <span title="Nguồn không cung cấp thời gian cho loại mục này — đây là thời điểm hệ thống ghi nhận lần đầu">➕ 25/08</span>
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/quizzes/2076798" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
@@ -2406,7 +2418,7 @@
                 
                 
                 <a href="https://lms.vinschool.edu.vn/courses/80102/pages/tong-quan-chuong-trinh-tieng-viet-5" target="_blank" rel="noopener"
-                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem bản gốc ↗</a>
+                   class="text-indigo-400 hover:text-indigo-600 hover:underline">Xem trang gốc ↗</a>
                 
               </div>
 
