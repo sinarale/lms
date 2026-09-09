@@ -311,6 +311,7 @@
      "def": "The heart, the blood vessels and the blood working together to move blood round the body.",
      "example": "Its three main parts are the heart, the blood vessels and the blood (p.3).",
      "concept": "c.u1.circ.parts",
+     "image": "w-circulatory-system.png",
      "card": "f.c0bd92e8"
     },
     {
@@ -318,6 +319,7 @@
      "def": "The organ that pumps blood around the body.",
      "example": "The left side pumps blood with oxygen to the body; the right side pumps blood without oxygen to the lungs (p.4).",
      "concept": "c.u1.circ.parts",
+     "image": "w-heart.jpg",
      "card": "f.2a37335e"
     },
     {
@@ -325,6 +327,7 @@
      "def": "The movement of blood round the body along the same pathway again and again.",
      "example": "Blood always moves along the same pathway in the blood vessels (p.5).",
      "concept": "c.u1.circ.parts",
+     "image": "w-circulation.jpg",
      "card": "f.4fbed88d"
     },
     {
@@ -332,6 +335,7 @@
      "def": "The red liquid that flows around the body carrying food and oxygen.",
      "example": "Blood carries food particles and oxygen to all parts of the body (p.4).",
      "concept": "c.u1.circ.vessels",
+     "image": "w-blood.jpg",
      "card": "f.24652e28"
     },
     {
@@ -339,6 +343,7 @@
      "def": "The tubes that blood moves through.",
      "example": "There are three kinds: arteries, veins and capillaries (p.4).",
      "concept": "c.u1.circ.vessels",
+     "image": "w-blood-vessels.jpg",
      "card": "f.5ed8f59e"
     },
     {
@@ -346,6 +351,7 @@
      "def": "The gas the body needs to stay alive.",
      "example": "The heart pumps blood in arteries to the lungs to pick up oxygen (p.5).",
      "concept": "c.u1.circ.vessels",
+     "image": "w-oxygen.jpg",
      "card": "f.7b96c408"
     },
     {
@@ -353,6 +359,7 @@
      "def": "A waste gas that the body must get rid of.",
      "example": "Blood picks it up from the body and carries it to the lungs (p.4).",
      "concept": "c.u1.circ.vessels",
+     "image": "w-carbon-dioxide.jpg",
      "card": "f.c69bd72e"
     },
     {
@@ -360,6 +367,7 @@
      "def": "The small beat you can feel under the skin, caused by the pressure of the blood as the heart pumps it.",
      "example": "Two good places to feel it are the neck and the inside of the wrist (p.7).",
      "concept": "c.u1.circ.pulse",
+     "image": "w-pulse.jpg",
      "card": "f.b3cc660b"
     },
     {
@@ -367,37 +375,45 @@
      "def": "The push of the blood against the walls of a blood vessel.",
      "example": "The pressure of the blood is what makes your pulse (p.7).",
      "concept": "c.u1.circ.pulse",
+     "image": "w-pressure.jpg",
      "card": "f.d1222178"
     }
    ],
    "points": [
     {
      "t": "The circulatory system has three main parts: the heart, the blood vessels and the blood (p.3).",
-     "concept": "c.u1.circ.parts"
+     "concept": "c.u1.circ.parts",
+     "mark": "m.c5fa63d9"
     },
     {
      "t": "The heart has two sides. The left side pumps blood with oxygen to the body; the right side pumps blood without oxygen to the lungs (p.4).",
-     "concept": "c.u1.circ.parts"
+     "concept": "c.u1.circ.parts",
+     "mark": "m.5cfa19ce"
     },
     {
      "t": "Blood carries food and oxygen to the body, and picks up waste such as carbon dioxide (p.4).",
-     "concept": "c.u1.circ.vessels"
+     "concept": "c.u1.circ.vessels",
+     "mark": "m.166dede7"
     },
     {
      "t": "The kidneys and the lungs are the organs that get rid of waste products (p.4).",
-     "concept": "c.u1.circ.vessels"
+     "concept": "c.u1.circ.vessels",
+     "mark": "m.0255cea9"
     },
     {
      "t": "Blood always travels the same pathway: heart to lungs, back to the heart, out to the body, back again (p.5).",
-     "concept": "c.u1.circ.vessels"
+     "concept": "c.u1.circ.vessels",
+     "mark": "m.4b7a6629"
     },
     {
      "t": "Your heart beats about 90 times a minute now, and about 70 times a minute when you are grown up (p.7).",
-     "concept": "c.u1.circ.pulse"
+     "concept": "c.u1.circ.pulse",
+     "mark": "m.f73993f3"
     },
     {
      "t": "The more active you are, the more often the heart beats, because the body needs more food and oxygen (p.7).",
-     "concept": "c.u1.circ.pulse"
+     "concept": "c.u1.circ.pulse",
+     "mark": "m.d6a9de08"
     }
    ],
    "checklists": [
@@ -418,7 +434,8 @@
        "look_for": "join arteries and veins; very narrow with thin walls (p.5)"
       }
      ],
-     "note": "The only veins that carry blood with oxygen are the ones from the lungs to the heart (p.5)."
+     "note": "The only veins that carry blood with oxygen are the ones from the lungs to the heart (p.5).",
+     "mark": "m.9c14465b"
     }
    ],
    "compares": [
@@ -439,7 +456,8 @@
        "a": "In the chest",
        "b": "At the neck or the wrist"
       }
-     ]
+     ],
+     "mark": "m.bbf4fc6d"
     }
    ],
    "watch_out": [],
@@ -450,7 +468,8 @@
      "page": "4",
      "image": "circulation.png",
      "summary": "Follow the drawing of the body: blood without oxygen goes to the lungs, and blood carrying oxygen comes back and is pumped out to the rest of the body.",
-     "result": "You can see which vessels carry blood with oxygen and which carry blood without it."
+     "result": "You can see which vessels carry blood with oxygen and which carry blood without it.",
+     "mark": "m.9596df45"
     },
     {
      "concept": "c.u1.circ.vessels",
@@ -458,7 +477,8 @@
      "page": "5",
      "image": "vessels.png",
      "summary": "Compare the drawings of an artery, a vein and the capillaries that join them.",
-     "result": "An artery has a thick elastic muscular wall, a vein a thin one, and the capillaries are very narrow with thin walls."
+     "result": "An artery has a thick elastic muscular wall, a vein a thin one, and the capillaries are very narrow with thin walls.",
+     "mark": "m.87a46178"
     },
     {
      "concept": "c.u1.circ.pulse",
@@ -466,7 +486,8 @@
      "page": "7",
      "image": null,
      "summary": "Find your pulse at the wrist or the neck and count the beats in one minute, three times over, then compare with the rest of the class.",
-     "result": "The three counts are not exactly the same, and different people in the class get different rates."
+     "result": "The three counts are not exactly the same, and different people in the class get different rates.",
+     "mark": "m.2c7d8a0d"
     }
    ],
    "terms": [
@@ -491,6 +512,7 @@
      "def": "The two organs in the chest that fill with air when you breathe in.",
      "example": "They are like stretchy sponges and are protected by the ribs (p.13).",
      "concept": "c.u1.resp.parts",
+     "image": "w-lungs.jpg",
      "card": "f.2c30679e"
     },
     {
@@ -498,6 +520,7 @@
      "def": "The air tube that leads from the mouth and nose down to the lungs.",
      "example": "Air from the lungs moves up the windpipe when you breathe out (p.14).",
      "concept": "c.u1.resp.parts",
+     "image": "w-windpipe.png",
      "card": "f.dd088ce6"
     },
     {
@@ -505,6 +528,7 @@
      "def": "The muscle below the lungs that moves to pull air in and push it out.",
      "example": "It relaxes and moves upwards when you breathe out (p.14).",
      "concept": "c.u1.resp.parts",
+     "image": "w-diaphragm.jpg",
      "card": "f.19a78b66"
     },
     {
@@ -512,6 +536,7 @@
      "def": "Moving air in and out of the lungs.",
      "example": "We need to breathe to stay alive (p.13).",
      "concept": "c.u1.resp.breathing",
+     "image": "w-breathing.jpg",
      "card": "f.034ef6b2"
     },
     {
@@ -519,29 +544,35 @@
      "def": "How many times you breathe in and out in a minute.",
      "example": "Measured by counting breaths over a set time (p.12).",
      "concept": "c.u1.resp.breathing",
+     "image": "w-breathing-rate.jpg",
      "card": "f.73f12baa"
     }
    ],
    "points": [
     {
      "t": "We use our lungs for breathing, and we need to breathe to stay alive (p.13).",
-     "concept": "c.u1.resp.parts"
+     "concept": "c.u1.resp.parts",
+     "mark": "m.34dc1af2"
     },
     {
      "t": "The ribs protect the lungs, which fill with air like stretchy sponges (p.13).",
-     "concept": "c.u1.resp.parts"
+     "concept": "c.u1.resp.parts",
+     "mark": "m.4f6373f5"
     },
     {
      "t": "Breathing in moves oxygen from the air into the blood vessels in the lungs (p.14).",
-     "concept": "c.u1.resp.breathing"
+     "concept": "c.u1.resp.breathing",
+     "mark": "m.70ce188d"
     },
     {
      "t": "As the body uses up oxygen it makes carbon dioxide, which the blood carries back to the lungs to be breathed out (p.14).",
-     "concept": "c.u1.resp.breathing"
+     "concept": "c.u1.resp.breathing",
+     "mark": "m.c5d1fbe1"
     },
     {
      "t": "Breathing in makes the chest bigger; breathing out makes it smaller and pushes the air out (p.14).",
-     "concept": "c.u1.resp.breathing"
+     "concept": "c.u1.resp.breathing",
+     "mark": "m.e75c2de7"
     }
    ],
    "checklists": [
@@ -561,7 +592,8 @@
        "sign": "chest muscles",
        "look_for": "move air in and out"
       }
-     ]
+     ],
+     "mark": "m.b5280165"
     }
    ],
    "compares": [
@@ -587,7 +619,8 @@
        "a": "Gets bigger, air comes in",
        "b": "Gets smaller, air is pushed out"
       }
-     ]
+     ],
+     "mark": "m.1a7a517d"
     }
    ],
    "watch_out": [],
@@ -598,7 +631,8 @@
      "page": "14",
      "image": "breathing.png",
      "summary": "Compare the two drawings of the chest, one while breathing in and one while breathing out.",
-     "result": "Breathing in the ribs move up and out and the diaphragm moves down; breathing out they move the other way."
+     "result": "Breathing in the ribs move up and out and the diaphragm moves down; breathing out they move the other way.",
+     "mark": "m.1082431a"
     },
     {
      "concept": "c.u1.resp.breathing",
@@ -606,7 +640,8 @@
      "page": "13",
      "image": null,
      "summary": "Put your hands on your rib cage and breathe in and out, then breathe out into a balloon.",
-     "result": "The rib cage rises and falls under your hands, and the balloon fills with the air from your lungs."
+     "result": "The rib cage rises and falls under your hands, and the balloon fills with the air from your lungs.",
+     "mark": "m.2398869f"
     }
    ],
    "terms": [
@@ -627,6 +662,7 @@
      "def": "The stage of life when the body changes and becomes able to reproduce.",
      "example": "It usually starts about age 13 in boys and from about age 11 in girls (p.20).",
      "concept": "c.u1.repro.puberty",
+     "image": "w-puberty.png",
      "card": "f.a87cdcba"
     },
     {
@@ -634,6 +670,7 @@
      "def": "Chemicals made in the body that cause the changes of puberty.",
      "example": "The changes of puberty are caused by hormones (p.20).",
      "concept": "c.u1.repro.puberty",
+     "image": "w-hormones.jpg",
      "card": "f.bd0fadcc"
     },
     {
@@ -641,6 +678,7 @@
      "def": "The parts of the body used in reproduction.",
      "example": "Boys and girls have different reproductive systems (p.22).",
      "concept": "c.u1.repro.parts",
+     "image": "w-reproductive-system.jpg",
      "card": "f.1af826d1"
     },
     {
@@ -648,6 +686,7 @@
      "def": "The sex cell made by the male reproductive system.",
      "example": "A sperm joins with an ovum at fertilisation (p.22).",
      "concept": "c.u1.repro.parts",
+     "image": "w-sperm.jpg",
      "card": "f.b423ec53"
     },
     {
@@ -655,6 +694,7 @@
      "def": "The sex cells made by the female reproductive system; one of them is an ovum.",
      "example": "Ova are released from the ovaries (p.23).",
      "concept": "c.u1.repro.parts",
+     "image": "w-ova.jpg",
      "card": "f.72a9d516"
     },
     {
@@ -662,6 +702,7 @@
      "def": "When a sperm and an ovum join together.",
      "example": "Fertilisation is the start of a new living thing (p.23).",
      "concept": "c.u1.repro.parts",
+     "image": "w-fertilisation.jpg",
      "card": "f.02e5d9e9"
     },
     {
@@ -669,29 +710,35 @@
      "def": "The monthly loss of blood from the womb when an ovum is not fertilised.",
      "example": "Menstruation begins during puberty in girls (p.23).",
      "concept": "c.u1.repro.parts",
+     "image": "w-menstruation.jpg",
      "card": "f.187f506d"
     }
    ],
    "points": [
     {
      "t": "Puberty does not happen all at once but in stages, and it starts at different ages in boys and girls (p.20).",
-     "concept": "c.u1.repro.puberty"
+     "concept": "c.u1.repro.puberty",
+     "mark": "m.7e492471"
     },
     {
      "t": "The first change is a fast growth spurt: boys can grow 10 cm in a year, girls up to 12 cm (p.20).",
-     "concept": "c.u1.repro.puberty"
+     "concept": "c.u1.repro.puberty",
+     "mark": "m.8a6098e4"
     },
     {
      "t": "Both boys and girls grow more body hair and may get oily skin and pimples (p.20).",
-     "concept": "c.u1.repro.puberty"
+     "concept": "c.u1.repro.puberty",
+     "mark": "m.c44735af"
     },
     {
      "t": "The changes of puberty are not the same for everyone and do not all happen at the same time (p.20).",
-     "concept": "c.u1.repro.puberty"
+     "concept": "c.u1.repro.puberty",
+     "mark": "m.04b4f912"
     },
     {
      "t": "Reproduction is part of the life cycle of all living things (p.19).",
-     "concept": "c.u1.repro.parts"
+     "concept": "c.u1.repro.parts",
+     "mark": "m.df71ae2c"
     }
    ],
    "checklists": [
@@ -719,7 +766,8 @@
        "sign": "Girls",
        "look_for": "wider hips, breasts develop, voice a little deeper"
       }
-     ]
+     ],
+     "mark": "m.444ffe10"
     }
    ],
    "compares": [],
@@ -745,6 +793,7 @@
      "def": "Any living thing that lives on or in the body of another living thing.",
      "example": "The fungus that causes ringworm is a parasite (p.25).",
      "concept": "c.u1.dis.causes",
+     "image": "w-parasite.jpg",
      "card": "f.e9dfbb33"
     },
     {
@@ -752,6 +801,7 @@
      "def": "The living thing that a parasite infects.",
      "example": "A person with malaria is the host of the parasite (p.25).",
      "concept": "c.u1.dis.causes",
+     "image": "w-host.jpg",
      "card": "f.3960ec4c"
     },
     {
@@ -759,6 +809,7 @@
      "def": "A way the body stops itself from being infected.",
      "example": "Skin, acid, mucus and tears are the body's defences (p.26).",
      "concept": "c.u1.dis.defences",
+     "image": "w-defence.jpg",
      "card": "f.af4b8454"
     },
     {
@@ -766,6 +817,7 @@
      "def": "Something that blocks the way in.",
      "example": "The skin acts as a barrier to stop germs getting into the body (p.26).",
      "concept": "c.u1.dis.defences",
+     "image": "w-barrier.jpg",
      "card": "f.10c02649"
     },
     {
@@ -773,6 +825,7 @@
      "def": "Sticky liquid in the nose and air passages that traps germs.",
      "example": "Mucus in the windpipe traps germs before they reach the lungs (p.26).",
      "concept": "c.u1.dis.defences",
+     "image": "w-mucus.jpg",
      "card": "f.7348e6d9"
     },
     {
@@ -780,6 +833,7 @@
      "def": "Keeping yourself and the things around you clean.",
      "example": "Washing hands with soap and water before eating is good hygiene (p.27).",
      "concept": "c.u1.dis.control",
+     "image": "w-hygiene.jpg",
      "card": "f.37906f83"
     },
     {
@@ -787,6 +841,7 @@
      "def": "An animal that spreads a disease without getting the disease itself.",
      "example": "Mosquitoes are the vector for malaria (p.29).",
      "concept": "c.u1.dis.control",
+     "image": "w-vector.jpg",
      "card": "f.a57e06f4"
     },
     {
@@ -794,37 +849,45 @@
      "def": "Something you put on your skin to keep insects away.",
      "example": "Insect repellents help prevent bites (p.29).",
      "concept": "c.u1.dis.control",
+     "image": "w-repellent.jpg",
      "card": "f.c1936ef0"
     }
    ],
    "points": [
     {
      "t": "Diseases stop our bodies from working properly. The living things that cause them grow and reproduce in or on the body (p.25).",
-     "concept": "c.u1.dis.causes"
+     "concept": "c.u1.dis.causes",
+     "mark": "m.89ca11c7"
     },
     {
      "t": "Bacteria can only be seen with a microscope, and not all of them are harmful (p.25).",
-     "concept": "c.u1.dis.causes"
+     "concept": "c.u1.dis.causes",
+     "mark": "m.08e318a5"
     },
     {
      "t": "Viruses are even smaller than bacteria, and all viruses are harmful (p.25).",
-     "concept": "c.u1.dis.causes"
+     "concept": "c.u1.dis.causes",
+     "mark": "m.11b45b75"
     },
     {
      "t": "Some fungi are useful, such as the yeast in bread, but others are parasites that cause disease (p.25).",
-     "concept": "c.u1.dis.causes"
+     "concept": "c.u1.dis.causes",
+     "mark": "m.b47f7867"
     },
     {
      "t": "Diseases spread by body contact and in food, water and air (p.27).",
-     "concept": "c.u1.dis.control"
+     "concept": "c.u1.dis.control",
+     "mark": "m.01d2bdc0"
     },
     {
      "t": "An insect vector does not cause the disease and does not get it; it passes on the parasite when it bites (p.29).",
-     "concept": "c.u1.dis.control"
+     "concept": "c.u1.dis.control",
+     "mark": "m.253e2ac2"
     },
     {
      "t": "The body has its own defences that stop germs getting in and kill the ones that do (p.26).",
-     "concept": "c.u1.dis.defences"
+     "concept": "c.u1.dis.defences",
+     "mark": "m.ebb6bf34"
     }
    ],
    "checklists": [
@@ -848,7 +911,8 @@
        "sign": "Tears",
        "look_for": "contain a chemical that kills some bacteria"
       }
-     ]
+     ],
+     "mark": "m.2841dd34"
     },
     {
      "concept": "c.u1.dis.control",
@@ -869,7 +933,8 @@
       {
        "sign": "Burn mosquito coils"
       }
-     ]
+     ],
+     "mark": "m.3b01f724"
     }
    ],
    "compares": [
@@ -895,7 +960,8 @@
        "a": "Cholera, pneumonia",
        "b": "Flu, chicken pox, measles"
       }
-     ]
+     ],
+     "mark": "m.81c4ecc2"
     }
    ],
    "watch_out": [],
@@ -906,7 +972,8 @@
      "page": "26",
      "image": "defences.png",
      "summary": "Look at the drawing showing where each of the body's defences works.",
-     "result": "Tears at the eyes, mucus in the nose and windpipe, skin over the whole body, and acid in the stomach."
+     "result": "Tears at the eyes, mucus in the nose and windpipe, skin over the whole body, and acid in the stomach.",
+     "mark": "m.582ed9d0"
     },
     {
      "concept": "c.u1.dis.control",
@@ -914,7 +981,8 @@
      "page": "28",
      "image": null,
      "summary": "A class surveyed people locally to find out which hygiene methods they use, then drew a dot plot of the results.",
-     "result": "Keeping the kitchen, toilet and surroundings clean was used by 12 people, the most of any method; washing hands after working with food was used by 4, the fewest."
+     "result": "Keeping the kitchen, toilet and surroundings clean was used by 12 people, the most of any method; washing hands after working with food was used by 4, the fewest.",
+     "mark": "m.4a2ad36a"
     }
    ],
    "terms": [
@@ -938,6 +1006,7 @@
      "def": "Something about a substance that allows us to tell it apart from other substances.",
      "example": "Each substance has its own melting point (p.36).",
      "concept": "c.materials.properties.state",
+     "image": "w-property.jpg",
      "card": "f.9ae33a7d"
     },
     {
@@ -945,6 +1014,7 @@
      "def": "The temperature at which a solid becomes a liquid.",
      "example": "Ice melts at 0 °C; the melting point of gold is 1064 °C (p.36).",
      "concept": "c.materials.properties.state",
+     "image": "w-melting-point.jpg",
      "card": "f.79a2e8db"
     },
     {
@@ -952,6 +1022,7 @@
      "def": "The temperature at which particles throughout a liquid have enough energy to change to a gas.",
      "example": "Pure water boils at 100 °C, vinegar at 118 °C (p.36).",
      "concept": "c.materials.properties.boiling_evaporation",
+     "image": "w-boiling-point.jpg",
      "card": "f.083fb413"
     },
     {
@@ -959,6 +1030,7 @@
      "def": "When particles on the surface of a liquid change into a gas.",
      "example": "Evaporation can occur at any temperature (p.36).",
      "concept": "c.materials.properties.boiling_evaporation",
+     "image": "w-evaporation.jpg",
      "card": "f.3fe997b6"
     },
     {
@@ -966,25 +1038,30 @@
      "def": "Everything that takes up space and has mass. Solid, liquid and gas are its three states.",
      "example": "Air is a mixture of gases, and gas is one of the states of matter (p.35, p.39).",
      "concept": "c.materials.properties.gases",
+     "image": "w-matter.jpg",
      "card": "f.0a94e1dd"
     }
    ],
    "points": [
     {
      "t": "Melting point is a property of a substance, so each substance has its own melting point (p.36).",
-     "concept": "c.materials.properties.state"
+     "concept": "c.materials.properties.state",
+     "mark": "m.19060ae2"
     },
     {
      "t": "Boiling point is a property too. Each substance boils at a certain temperature (p.36).",
-     "concept": "c.materials.properties.boiling_evaporation"
+     "concept": "c.materials.properties.boiling_evaporation",
+     "mark": "m.5814d8e9"
     },
     {
      "t": "Boiling and evaporation both change a liquid into a gas, but they are not the same process (p.36).",
-     "concept": "c.materials.properties.boiling_evaporation"
+     "concept": "c.materials.properties.boiling_evaporation",
+     "mark": "m.08c217e5"
     },
     {
      "t": "All matter takes up space and has mass. Air is a mixture of gases, so air is matter (p.39).",
-     "concept": "c.materials.properties.gases"
+     "concept": "c.materials.properties.gases",
+     "mark": "m.03a9079d"
     }
    ],
    "watch_out": [],
@@ -1019,7 +1096,8 @@
        "sign": "copper 1083 °C"
       }
      ],
-     "note": "The Check your progress table (p.62) asks you to list these from highest to lowest."
+     "note": "The Check your progress table (p.62) asks you to list these from highest to lowest.",
+     "mark": "m.79874bae"
     },
     {
      "concept": "c.materials.properties.boiling_evaporation",
@@ -1034,7 +1112,8 @@
       {
        "sign": "liquid gold 2856 °C"
       }
-     ]
+     ],
+     "mark": "m.3e137e2e"
     }
    ],
    "compares": [
@@ -1055,7 +1134,8 @@
        "a": "Most liquids boil only when heated",
        "b": "Can occur at any temperature"
       }
-     ]
+     ],
+     "mark": "m.72d6cada"
     }
    ],
    "experiments": [
@@ -1065,7 +1145,8 @@
      "page": "37",
      "image": "melting.png",
      "summary": "The teacher heats three different solids in pans on a hotplate and measures the temperature of each one the moment it melts.",
-     "result": "Each solid melts at a different temperature on the thermometer, and the readings go in a table."
+     "result": "Each solid melts at a different temperature on the thermometer, and the readings go in a table.",
+     "mark": "m.ee7c8459"
     },
     {
      "concept": "c.materials.properties.gases",
@@ -1073,7 +1154,8 @@
      "page": "40",
      "image": "balloons.png",
      "summary": "Two blown-up balloons are hung from a ruler so they balance, then the tie on one balloon is loosened to let the air out.",
-     "result": "When the tie on one balloon is loosened, the balanced ruler tips down on the side of the full balloon."
+     "result": "When the tie on one balloon is loosened, the balanced ruler tips down on the side of the full balloon.",
+     "mark": "m.f77eadd9"
     }
    ]
   },
@@ -1087,6 +1169,7 @@
      "def": "Heat being transferred from one object to another.",
      "example": "A cold metal teaspoon in a hot cup of tea: the handle feels warm after a while (p.42-43).",
      "concept": "c.materials.conductors.heat",
+     "image": "w-conduction.jpg",
      "card": "f.d543e0c2"
     },
     {
@@ -1094,6 +1177,7 @@
      "def": "A substance or material that conducts heat well.",
      "example": "Metals. Silver is the best conductor of heat (p.43-44).",
      "concept": "c.materials.conductors.heat",
+     "image": "w-thermal-conductor.jpg",
      "card": "f.06dd155a"
     },
     {
@@ -1101,6 +1185,7 @@
      "def": "A substance or material that is able to conduct electricity.",
      "example": "Metals, such as the copper connecting wire in the circuit (p.45).",
      "concept": "c.materials.conductors.electricity",
+     "image": "w-electrical-conductor.jpg",
      "card": "f.e6856b98"
     },
     {
@@ -1108,25 +1193,30 @@
      "def": "A material or substance that is not a good conductor of electricity.",
      "example": "Plastic, rubber, glass and most non-metal substances (p.61).",
      "concept": "c.materials.conductors.electricity",
+     "image": "w-insulator.jpg",
      "card": "f.9235ba82"
     }
    ],
    "points": [
     {
      "t": "Metals are good conductors of heat and silver is the best. Non-metals such as glass and plastic are not good conductors of heat (p.44).",
-     "concept": "c.materials.conductors.heat"
+     "concept": "c.materials.conductors.heat",
+     "mark": "m.da6c8265"
     },
     {
      "t": "How well a substance can conduct heat is a property of the substance. Some substances conduct heat better than others (p.44).",
-     "concept": "c.materials.conductors.heat"
+     "concept": "c.materials.conductors.heat",
+     "mark": "m.b6af236c"
     },
     {
      "t": "The ability to conduct electricity is a property of materials and substances. Metals conduct electricity (p.45).",
-     "concept": "c.materials.conductors.electricity"
+     "concept": "c.materials.conductors.electricity",
+     "mark": "m.b99d646d"
     },
     {
      "t": "Substances that are not good conductors of electricity are called insulators (p.61).",
-     "concept": "c.materials.conductors.electricity"
+     "concept": "c.materials.conductors.electricity",
+     "mark": "m.7c990831"
     }
    ],
    "watch_out": [],
@@ -1162,7 +1252,8 @@
        "look_for": "80 · 10"
       }
      ],
-     "note": "Measured in W/m−K. Question 4 asks you to find the measurements that do not fit the pattern."
+     "note": "Measured in W/m−K. Question 4 asks you to find the measurements that do not fit the pattern.",
+     "mark": "m.bd8e948a"
     }
    ],
    "compares": [],
@@ -1173,7 +1264,8 @@
      "page": "43",
      "image": "beads.png",
      "summary": "A bead is stuck with petroleum jelly to the top of a metal spoon, a plastic spoon, a glass rod, a pencil and a piece of polystyrene foam, then all of them are stood in hot water.",
-     "result": "The beads fall off one after another, and the order shows which material carried the heat fastest."
+     "result": "The beads fall off one after another, and the order shows which material carried the heat fastest.",
+     "mark": "m.2bfa8473"
     },
     {
      "concept": "c.materials.conductors.electricity",
@@ -1181,7 +1273,8 @@
      "page": "45-46",
      "image": "circuit.png",
      "summary": "A lamp circuit is set up with two free wire ends, and different substances (copper, steel, aluminium foil, graphite, sugar, water) are placed between the ends in turn.",
-     "result": "For each substance the lamp is bright, dim or does not shine, recorded as two ticks, one tick or none."
+     "result": "For each substance the lamp is bright, dim or does not shine, recorded as two ticks, one tick or none.",
+     "mark": "m.2033e56a"
     }
    ]
   },
@@ -1195,6 +1288,7 @@
      "def": "A change that alters how a substance looks or feels, without turning it into a new substance.",
      "example": "A change of state, such as ice melting into water (p.50).",
      "concept": "c.materials.reversible.changes",
+     "image": "w-physical-change.jpg",
      "card": "f.ac0ae625"
     },
     {
@@ -1202,6 +1296,7 @@
      "def": "A change that can be changed back again.",
      "example": "Solid ice to liquid water, and liquid water back to solid ice (p.50).",
      "concept": "c.materials.reversible.changes",
+     "image": "w-reversible.jpg",
      "card": "f.86b6e483"
     },
     {
@@ -1209,6 +1304,7 @@
      "def": "A change that cannot be reversed.",
      "example": "Burning a match: the wood changes into a black substance called carbon (p.50).",
      "concept": "c.materials.reversible.changes",
+     "image": "w-irreversible.jpg",
      "card": "f.3dac8cdc"
     },
     {
@@ -1216,6 +1312,7 @@
      "def": "The substance that dissolves.",
      "example": "The dissolved salt in sea water (p.51).",
      "concept": "c.materials.reversible.dissolving",
+     "image": "w-solute.jpg",
      "card": "f.c7862f96"
     },
     {
@@ -1223,6 +1320,7 @@
      "def": "The substance in which the solute dissolves.",
      "example": "The water in sea water (p.51).",
      "concept": "c.materials.reversible.dissolving",
+     "image": "w-solvent.jpg",
      "card": "f.df5d884e"
     },
     {
@@ -1230,6 +1328,7 @@
      "def": "Looking the same throughout.",
      "example": "A solution has a uniform appearance, so you cannot see the solute in it (p.52).",
      "concept": "c.materials.reversible.dissolving",
+     "image": "w-uniform.jpg",
      "card": "f.e96b0da8"
     },
     {
@@ -1237,37 +1336,45 @@
      "def": "How fast something happens.",
      "example": "Stirring increases the rate at which a solute dissolves (p.53).",
      "concept": "c.materials.reversible.factors",
+     "image": "w-rate.jpg",
      "card": "f.3a9c736b"
     }
    ],
    "points": [
     {
      "t": "A physical change alters how a substance looks or feels. The substance does not change into a new substance (p.50).",
-     "concept": "c.materials.reversible.changes"
+     "concept": "c.materials.reversible.changes",
+     "mark": "m.518dd3d7"
     },
     {
      "t": "A change is reversible when the substance can be changed back to the way it was (p.50).",
-     "concept": "c.materials.reversible.changes"
+     "concept": "c.materials.reversible.changes",
+     "mark": "m.f89edfcf"
     },
     {
      "t": "Irreversible changes cannot be reversed, and some turn one substance into another. That is a chemical change (p.50).",
-     "concept": "c.materials.reversible.changes"
+     "concept": "c.materials.reversible.changes",
+     "mark": "m.96814d40"
     },
     {
      "t": "The solute and the solvent together form a solution. Sea water is salty because there is dissolved salt in the water (p.51).",
-     "concept": "c.materials.reversible.dissolving"
+     "concept": "c.materials.reversible.dissolving",
+     "mark": "m.b0c98659"
     },
     {
      "t": "When a solute dissolves, its particles move between the solvent particles and spread evenly. That is why you cannot see the solute afterwards (p.52).",
-     "concept": "c.materials.reversible.dissolving"
+     "concept": "c.materials.reversible.dissolving",
+     "mark": "m.c124a5ca"
     },
     {
      "t": "Stirring increases the rate at which a solute dissolves. It spreads the solute particles into the spaces between the solvent particles more quickly (p.53).",
-     "concept": "c.materials.reversible.factors"
+     "concept": "c.materials.reversible.factors",
+     "mark": "m.3e547a49"
     },
     {
      "t": "In a heated solvent the particles gain energy and move faster, so the solute dissolves faster (p.54).",
-     "concept": "c.materials.reversible.factors"
+     "concept": "c.materials.reversible.factors",
+     "mark": "m.3001d975"
     }
    ],
    "watch_out": [],
@@ -1304,7 +1411,8 @@
        "a": "Ice melts to water, water freezes to ice",
        "b": "A burning match: wood becomes carbon"
       }
-     ]
+     ],
+     "mark": "m.45e71c5b"
     }
    ],
    "experiments": [
@@ -1314,7 +1422,8 @@
      "page": "49",
      "image": "icewater.png",
      "summary": "Ice cubes are left on a saucer in a warm place for five minutes, then the water is put back in the freezer.",
-     "result": "After five minutes in the warm the ice has melted, and back in the freezer it becomes solid again."
+     "result": "After five minutes in the warm the ice has melted, and back in the freezer it becomes solid again.",
+     "mark": "m.2a95d329"
     },
     {
      "concept": "c.materials.reversible.dissolving",
@@ -1322,7 +1431,8 @@
      "page": "52",
      "image": "coppersulfate.png",
      "summary": "Look at the picture of copper sulfate being added to water and describe what happens to it.",
-     "result": "The copper sulfate spreads through the water until you can no longer see it in the solution."
+     "result": "The copper sulfate spreads through the water until you can no longer see it in the solution.",
+     "mark": "m.740cd477"
     },
     {
      "concept": "c.materials.reversible.factors",
@@ -1330,7 +1440,8 @@
      "page": "54",
      "image": "marcus.png",
      "summary": "A teaspoon of sugar is stirred into 100 ml of cold water and into 100 ml of hot water, and the time it takes to dissolve is measured for each.",
-     "result": "The sugar in the hot water takes less time on the stopwatch than the sugar in the cold water."
+     "result": "The sugar in the hot water takes less time on the stopwatch than the sugar in the cold water.",
+     "mark": "m.3b1311f0"
     }
    ]
   },
@@ -1344,6 +1455,7 @@
      "def": "When substances are mixed together, change, and form a new substance.",
      "example": "Vinegar mixed with bicarbonate of soda (p.57).",
      "concept": "c.materials.chemical.reactants_products",
+     "image": "w-chemical-reaction.jpg",
      "card": "f.5aedf181"
     },
     {
@@ -1351,6 +1463,7 @@
      "def": "What substances do when they change together and form a new substance.",
      "example": "Vinegar and bicarbonate of soda react together (p.57).",
      "concept": "c.materials.chemical.reactants_products",
+     "image": "w-react.jpg",
      "card": "f.4d1f996a"
     },
     {
@@ -1358,6 +1471,7 @@
      "def": "The substances that react together.",
      "example": "Vinegar and bicarbonate of soda (p.57).",
      "concept": "c.materials.chemical.reactants_products",
+     "image": "w-reactants.jpg",
      "card": "f.5379f397"
     },
     {
@@ -1365,6 +1479,7 @@
      "def": "The new substances that form in a reaction.",
      "example": "The gas that is produced in the jar (p.57-58).",
      "concept": "c.materials.chemical.reactants_products",
+     "image": "w-products.jpg",
      "card": "f.fe0a091f"
     },
     {
@@ -1372,21 +1487,25 @@
      "def": "Something we can see that shows a product has formed.",
      "example": "The gas produced when vinegar and bicarbonate of soda react (p.58).",
      "concept": "c.materials.chemical.evidence",
+     "image": "w-evidence.jpg",
      "card": "f.7ea014de"
     }
    ],
    "points": [
     {
      "t": "In a chemical reaction substances react together and form new substances. The substances that react are the reactants and the new ones are the products (p.57).",
-     "concept": "c.materials.chemical.reactants_products"
+     "concept": "c.materials.chemical.reactants_products",
+     "mark": "m.3d7cf58b"
     },
     {
      "t": "Sometimes we can see that a product has formed, and that is evidence of the reaction. There are also other ways to tell (p.58).",
-     "concept": "c.materials.chemical.evidence"
+     "concept": "c.materials.chemical.evidence",
+     "mark": "m.d27a60d2"
     },
     {
      "t": "When clear limewater is mixed with carbon dioxide, the reaction forms a substance called calcium carbonate (p.59).",
-     "concept": "c.materials.chemical.evidence"
+     "concept": "c.materials.chemical.evidence",
+     "mark": "m.5a284397"
     }
    ],
    "watch_out": [],
@@ -1415,7 +1534,8 @@
        "look_for": "vinegar on wire wool (p.59)"
       }
      ],
-     "note": "Question 1 asks for three ways with an example of each; the topic's investigations show one each."
+     "note": "Question 1 asks for three ways with an example of each; the topic's investigations show one each.",
+     "mark": "m.baf9f98b"
     }
    ],
    "compares": [
@@ -1436,7 +1556,8 @@
        "a": "limewater, carbon dioxide",
        "b": "calcium carbonate (p.59 Q2)"
       }
-     ]
+     ],
+     "mark": "m.dcd68a14"
     }
    ],
    "experiments": [
@@ -1446,7 +1567,8 @@
      "page": "57",
      "image": "vinegar.png",
      "summary": "A teaspoon of bicarbonate of soda is added to vinegar in a jar and watched for five minutes.",
-     "result": "A gas is produced straight away, and after five minutes you look for any other product."
+     "result": "A gas is produced straight away, and after five minutes you look for any other product.",
+     "mark": "m.1ad38e6f"
     },
     {
      "concept": "c.materials.chemical.evidence",
@@ -1454,7 +1576,8 @@
      "page": "58",
      "image": "limewater.png",
      "summary": "Iodine solution is added to water and cornstarch is stirred in; in another beaker, air is breathed through a straw into limewater.",
-     "result": "Adding cornstarch to the iodine solution changes what you see, and breathing carbon dioxide into the limewater forms a new substance."
+     "result": "Adding cornstarch to the iodine solution changes what you see, and breathing carbon dioxide into the limewater forms a new substance.",
+     "mark": "m.3330c0dd"
     },
     {
      "concept": "c.materials.chemical.evidence",
@@ -1462,7 +1585,8 @@
      "page": "59",
      "image": "wirewool.png",
      "summary": "Vinegar is poured over a ball of wire wool in a beaker, and the temperature is recorded straight away and again after five minutes.",
-     "result": "The thermometer reading after five minutes is different from the reading taken at the start."
+     "result": "The thermometer reading after five minutes is different from the reading taken at the start.",
+     "mark": "m.8413eeb9"
     }
    ]
   }
@@ -1574,7 +1698,8 @@
    "front_en": "Property",
    "back_en": "Something about a substance that allows us to tell it apart from other substances.",
    "example_en": "Each substance has its own melting point (p.36).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-property.jpg"
   },
   {
    "id": "f.79a2e8db",
@@ -1582,7 +1707,8 @@
    "front_en": "Melting point",
    "back_en": "The temperature at which a solid becomes a liquid.",
    "example_en": "Ice melts at 0 °C; the melting point of gold is 1064 °C (p.36).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-melting-point.jpg"
   },
   {
    "id": "f.083fb413",
@@ -1590,7 +1716,8 @@
    "front_en": "Boiling point",
    "back_en": "The temperature at which particles throughout a liquid have enough energy to change to a gas.",
    "example_en": "Pure water boils at 100 °C, vinegar at 118 °C (p.36).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-boiling-point.jpg"
   },
   {
    "id": "f.3fe997b6",
@@ -1598,7 +1725,8 @@
    "front_en": "Evaporation",
    "back_en": "When particles on the surface of a liquid change into a gas.",
    "example_en": "Evaporation can occur at any temperature (p.36).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-evaporation.jpg"
   },
   {
    "id": "f.0a94e1dd",
@@ -1606,7 +1734,8 @@
    "front_en": "Matter",
    "back_en": "Everything that takes up space and has mass. Solid, liquid and gas are its three states.",
    "example_en": "Air is a mixture of gases, and gas is one of the states of matter (p.35, p.39).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-matter.jpg"
   },
   {
    "id": "f.d543e0c2",
@@ -1614,7 +1743,8 @@
    "front_en": "Conduction",
    "back_en": "Heat being transferred from one object to another.",
    "example_en": "A cold metal teaspoon in a hot cup of tea: the handle feels warm after a while (p.42-43).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-conduction.jpg"
   },
   {
    "id": "f.06dd155a",
@@ -1622,7 +1752,8 @@
    "front_en": "Thermal conductor",
    "back_en": "A substance or material that conducts heat well.",
    "example_en": "Metals. Silver is the best conductor of heat (p.43-44).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-thermal-conductor.jpg"
   },
   {
    "id": "f.e6856b98",
@@ -1630,7 +1761,8 @@
    "front_en": "Electrical conductor",
    "back_en": "A substance or material that is able to conduct electricity.",
    "example_en": "Metals, such as the copper connecting wire in the circuit (p.45).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-electrical-conductor.jpg"
   },
   {
    "id": "f.9235ba82",
@@ -1638,7 +1770,8 @@
    "front_en": "Insulator",
    "back_en": "A material or substance that is not a good conductor of electricity.",
    "example_en": "Plastic, rubber, glass and most non-metal substances (p.61).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-insulator.jpg"
   },
   {
    "id": "f.ac0ae625",
@@ -1646,7 +1779,8 @@
    "front_en": "Physical change",
    "back_en": "A change that alters how a substance looks or feels, without turning it into a new substance.",
    "example_en": "A change of state, such as ice melting into water (p.50).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-physical-change.jpg"
   },
   {
    "id": "f.86b6e483",
@@ -1654,7 +1788,8 @@
    "front_en": "Reversible",
    "back_en": "A change that can be changed back again.",
    "example_en": "Solid ice to liquid water, and liquid water back to solid ice (p.50).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-reversible.jpg"
   },
   {
    "id": "f.3dac8cdc",
@@ -1662,7 +1797,8 @@
    "front_en": "Irreversible",
    "back_en": "A change that cannot be reversed.",
    "example_en": "Burning a match: the wood changes into a black substance called carbon (p.50).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-irreversible.jpg"
   },
   {
    "id": "f.c7862f96",
@@ -1670,7 +1806,8 @@
    "front_en": "Solute",
    "back_en": "The substance that dissolves.",
    "example_en": "The dissolved salt in sea water (p.51).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-solute.jpg"
   },
   {
    "id": "f.df5d884e",
@@ -1678,7 +1815,8 @@
    "front_en": "Solvent",
    "back_en": "The substance in which the solute dissolves.",
    "example_en": "The water in sea water (p.51).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-solvent.jpg"
   },
   {
    "id": "f.e96b0da8",
@@ -1686,7 +1824,8 @@
    "front_en": "Uniform",
    "back_en": "Looking the same throughout.",
    "example_en": "A solution has a uniform appearance, so you cannot see the solute in it (p.52).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-uniform.jpg"
   },
   {
    "id": "f.3a9c736b",
@@ -1694,7 +1833,8 @@
    "front_en": "Rate",
    "back_en": "How fast something happens.",
    "example_en": "Stirring increases the rate at which a solute dissolves (p.53).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-rate.jpg"
   },
   {
    "id": "f.5aedf181",
@@ -1702,7 +1842,8 @@
    "front_en": "Chemical reaction",
    "back_en": "When substances are mixed together, change, and form a new substance.",
    "example_en": "Vinegar mixed with bicarbonate of soda (p.57).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-chemical-reaction.jpg"
   },
   {
    "id": "f.4d1f996a",
@@ -1710,7 +1851,8 @@
    "front_en": "React",
    "back_en": "What substances do when they change together and form a new substance.",
    "example_en": "Vinegar and bicarbonate of soda react together (p.57).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-react.jpg"
   },
   {
    "id": "f.5379f397",
@@ -1718,7 +1860,8 @@
    "front_en": "Reactants",
    "back_en": "The substances that react together.",
    "example_en": "Vinegar and bicarbonate of soda (p.57).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-reactants.jpg"
   },
   {
    "id": "f.fe0a091f",
@@ -1726,7 +1869,8 @@
    "front_en": "Products",
    "back_en": "The new substances that form in a reaction.",
    "example_en": "The gas that is produced in the jar (p.57-58).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-products.jpg"
   },
   {
    "id": "f.7ea014de",
@@ -1734,7 +1878,8 @@
    "front_en": "Evidence",
    "back_en": "Something we can see that shows a product has formed.",
    "example_en": "The gas produced when vinegar and bicarbonate of soda react (p.58).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-evidence.jpg"
   },
   {
    "id": "f.ad2b902f",
@@ -1854,7 +1999,8 @@
    "front_en": "Circulatory system",
    "back_en": "The heart, the blood vessels and the blood working together to move blood round the body.",
    "example_en": "Its three main parts are the heart, the blood vessels and the blood (p.3).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-circulatory-system.png"
   },
   {
    "id": "f.2a37335e",
@@ -1862,7 +2008,8 @@
    "front_en": "Heart",
    "back_en": "The organ that pumps blood around the body.",
    "example_en": "The left side pumps blood with oxygen to the body; the right side pumps blood without oxygen to the lungs (p.4).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-heart.jpg"
   },
   {
    "id": "f.4fbed88d",
@@ -1870,7 +2017,8 @@
    "front_en": "Circulation",
    "back_en": "The movement of blood round the body along the same pathway again and again.",
    "example_en": "Blood always moves along the same pathway in the blood vessels (p.5).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-circulation.jpg"
   },
   {
    "id": "f.24652e28",
@@ -1878,7 +2026,8 @@
    "front_en": "Blood",
    "back_en": "The red liquid that flows around the body carrying food and oxygen.",
    "example_en": "Blood carries food particles and oxygen to all parts of the body (p.4).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-blood.jpg"
   },
   {
    "id": "f.5ed8f59e",
@@ -1886,7 +2035,8 @@
    "front_en": "Blood vessels",
    "back_en": "The tubes that blood moves through.",
    "example_en": "There are three kinds: arteries, veins and capillaries (p.4).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-blood-vessels.jpg"
   },
   {
    "id": "f.7b96c408",
@@ -1894,7 +2044,8 @@
    "front_en": "Oxygen",
    "back_en": "The gas the body needs to stay alive.",
    "example_en": "The heart pumps blood in arteries to the lungs to pick up oxygen (p.5).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-oxygen.jpg"
   },
   {
    "id": "f.c69bd72e",
@@ -1902,7 +2053,8 @@
    "front_en": "Carbon dioxide",
    "back_en": "A waste gas that the body must get rid of.",
    "example_en": "Blood picks it up from the body and carries it to the lungs (p.4).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-carbon-dioxide.jpg"
   },
   {
    "id": "f.b3cc660b",
@@ -1910,7 +2062,8 @@
    "front_en": "Pulse",
    "back_en": "The small beat you can feel under the skin, caused by the pressure of the blood as the heart pumps it.",
    "example_en": "Two good places to feel it are the neck and the inside of the wrist (p.7).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-pulse.jpg"
   },
   {
    "id": "f.d1222178",
@@ -1918,7 +2071,8 @@
    "front_en": "Pressure",
    "back_en": "The push of the blood against the walls of a blood vessel.",
    "example_en": "The pressure of the blood is what makes your pulse (p.7).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-pressure.jpg"
   },
   {
    "id": "f.2c30679e",
@@ -1926,7 +2080,8 @@
    "front_en": "Lungs",
    "back_en": "The two organs in the chest that fill with air when you breathe in.",
    "example_en": "They are like stretchy sponges and are protected by the ribs (p.13).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-lungs.jpg"
   },
   {
    "id": "f.dd088ce6",
@@ -1934,7 +2089,8 @@
    "front_en": "Windpipe",
    "back_en": "The air tube that leads from the mouth and nose down to the lungs.",
    "example_en": "Air from the lungs moves up the windpipe when you breathe out (p.14).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-windpipe.png"
   },
   {
    "id": "f.19a78b66",
@@ -1942,7 +2098,8 @@
    "front_en": "Diaphragm",
    "back_en": "The muscle below the lungs that moves to pull air in and push it out.",
    "example_en": "It relaxes and moves upwards when you breathe out (p.14).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-diaphragm.jpg"
   },
   {
    "id": "f.034ef6b2",
@@ -1950,7 +2107,8 @@
    "front_en": "Breathing",
    "back_en": "Moving air in and out of the lungs.",
    "example_en": "We need to breathe to stay alive (p.13).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-breathing.jpg"
   },
   {
    "id": "f.73f12baa",
@@ -1958,7 +2116,8 @@
    "front_en": "Breathing rate",
    "back_en": "How many times you breathe in and out in a minute.",
    "example_en": "Measured by counting breaths over a set time (p.12).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-breathing-rate.jpg"
   },
   {
    "id": "f.a87cdcba",
@@ -1966,7 +2125,8 @@
    "front_en": "Puberty",
    "back_en": "The stage of life when the body changes and becomes able to reproduce.",
    "example_en": "It usually starts about age 13 in boys and from about age 11 in girls (p.20).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-puberty.png"
   },
   {
    "id": "f.bd0fadcc",
@@ -1974,7 +2134,8 @@
    "front_en": "Hormones",
    "back_en": "Chemicals made in the body that cause the changes of puberty.",
    "example_en": "The changes of puberty are caused by hormones (p.20).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-hormones.jpg"
   },
   {
    "id": "f.1af826d1",
@@ -1982,7 +2143,8 @@
    "front_en": "Reproductive system",
    "back_en": "The parts of the body used in reproduction.",
    "example_en": "Boys and girls have different reproductive systems (p.22).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-reproductive-system.jpg"
   },
   {
    "id": "f.b423ec53",
@@ -1990,7 +2152,8 @@
    "front_en": "Sperm",
    "back_en": "The sex cell made by the male reproductive system.",
    "example_en": "A sperm joins with an ovum at fertilisation (p.22).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-sperm.jpg"
   },
   {
    "id": "f.72a9d516",
@@ -1998,7 +2161,8 @@
    "front_en": "Ova",
    "back_en": "The sex cells made by the female reproductive system; one of them is an ovum.",
    "example_en": "Ova are released from the ovaries (p.23).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-ova.jpg"
   },
   {
    "id": "f.02e5d9e9",
@@ -2006,7 +2170,8 @@
    "front_en": "Fertilisation",
    "back_en": "When a sperm and an ovum join together.",
    "example_en": "Fertilisation is the start of a new living thing (p.23).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-fertilisation.jpg"
   },
   {
    "id": "f.187f506d",
@@ -2014,7 +2179,8 @@
    "front_en": "Menstruation",
    "back_en": "The monthly loss of blood from the womb when an ovum is not fertilised.",
    "example_en": "Menstruation begins during puberty in girls (p.23).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-menstruation.jpg"
   },
   {
    "id": "f.e9dfbb33",
@@ -2022,7 +2188,8 @@
    "front_en": "Parasite",
    "back_en": "Any living thing that lives on or in the body of another living thing.",
    "example_en": "The fungus that causes ringworm is a parasite (p.25).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-parasite.jpg"
   },
   {
    "id": "f.3960ec4c",
@@ -2030,7 +2197,8 @@
    "front_en": "Host",
    "back_en": "The living thing that a parasite infects.",
    "example_en": "A person with malaria is the host of the parasite (p.25).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-host.jpg"
   },
   {
    "id": "f.af4b8454",
@@ -2038,7 +2206,8 @@
    "front_en": "Defence",
    "back_en": "A way the body stops itself from being infected.",
    "example_en": "Skin, acid, mucus and tears are the body's defences (p.26).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-defence.jpg"
   },
   {
    "id": "f.10c02649",
@@ -2046,7 +2215,8 @@
    "front_en": "Barrier",
    "back_en": "Something that blocks the way in.",
    "example_en": "The skin acts as a barrier to stop germs getting into the body (p.26).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-barrier.jpg"
   },
   {
    "id": "f.7348e6d9",
@@ -2054,7 +2224,8 @@
    "front_en": "Mucus",
    "back_en": "Sticky liquid in the nose and air passages that traps germs.",
    "example_en": "Mucus in the windpipe traps germs before they reach the lungs (p.26).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-mucus.jpg"
   },
   {
    "id": "f.37906f83",
@@ -2062,7 +2233,8 @@
    "front_en": "Hygiene",
    "back_en": "Keeping yourself and the things around you clean.",
    "example_en": "Washing hands with soap and water before eating is good hygiene (p.27).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-hygiene.jpg"
   },
   {
    "id": "f.a57e06f4",
@@ -2070,7 +2242,8 @@
    "front_en": "Vector",
    "back_en": "An animal that spreads a disease without getting the disease itself.",
    "example_en": "Mosquitoes are the vector for malaria (p.29).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-vector.jpg"
   },
   {
    "id": "f.c1936ef0",
@@ -2078,7 +2251,8 @@
    "front_en": "Repellent",
    "back_en": "Something you put on your skin to keep insects away.",
    "example_en": "Insect repellents help prevent bites (p.29).",
-   "kind": "term"
+   "kind": "term",
+   "image": "w-repellent.jpg"
   }
  ],
  "quiz": [
@@ -4568,5 +4742,5 @@
   }
  ],
  "retired": [],
- "generated_at": "2026-09-07T11:00:30+00:00"
+ "generated_at": "2026-09-09T04:42:59+00:00"
 }
