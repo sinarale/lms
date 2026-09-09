@@ -107,36 +107,19 @@
    ],
    "words": [
     {
-     "title": "Classroom objects",
+     "title": "Classroom objects and days of the week",
      "page": "14-15",
      "concept": "c.esl2.u1.words",
      "items": [
       {
-       "word": "tablet",
+       "word": "book",
        "pos": "noun",
-       "ipa": "/ˈtæblət/",
-       "def": "A small flat computer you touch with your finger.",
-       "example": "There is a tablet on the teacher's desk.",
-       "example_vi": "Có một chiếc máy tính bảng trên bàn cô giáo.",
-       "card": "f.fabcacd2"
-      },
-      {
-       "word": "clock",
-       "pos": "noun",
-       "ipa": "/klɑːk/",
-       "def": "A thing on the wall that shows the time.",
-       "example": "Point to the clock, please!",
-       "example_vi": "Hãy chỉ vào cái đồng hồ nào!",
-       "card": "f.04f6b3ea"
-      },
-      {
-       "word": "calendar",
-       "pos": "noun",
-       "ipa": "/ˈkæləndər/",
-       "def": "A chart that shows the days and months of the year.",
-       "example": "There is a world map and a calendar on the wall.",
-       "example_vi": "Trên tường có một tấm bản đồ thế giới và một tờ lịch.",
-       "card": "f.adab5090"
+       "ipa": "/bʊk/",
+       "def": "Pages with words and pictures joined together.",
+       "example": "When I open up a book, each page whispers, 'Look!'",
+       "example_vi": "Khi em mở một quyển sách, mỗi trang lại thì thầm: 'Nhìn kìa!'",
+       "image": "w-book.png",
+       "card": "f.f69f2330"
       },
       {
        "word": "map",
@@ -145,43 +128,101 @@
        "def": "A drawing that shows where places are.",
        "example": "We look at the map to find our country.",
        "example_vi": "Chúng em nhìn bản đồ để tìm nước mình.",
+       "image": "w-map.png",
        "card": "f.ab478f3e"
       },
       {
-       "word": "book",
+       "word": "calendar",
        "pos": "noun",
-       "ipa": "/bʊk/",
-       "def": "Pages with words and pictures joined together.",
-       "example": "When I open up a book, each page whispers, 'Look!'",
-       "example_vi": "Khi em mở một quyển sách, mỗi trang lại thì thầm: 'Nhìn kìa!'",
-       "card": "f.f69f2330"
+       "ipa": "/ˈkæləndər/",
+       "def": "A chart that shows the days and months of the year.",
+       "example": "There is a world map and a calendar on the wall.",
+       "example_vi": "Trên tường có một tấm bản đồ thế giới và một tờ lịch.",
+       "image": "w-calendar.png",
+       "card": "f.adab5090"
       },
       {
-       "word": "ruler",
+       "word": "clock",
        "pos": "noun",
-       "ipa": "/ˈruːlər/",
-       "def": "A straight stick you use to measure and to draw lines.",
-       "example": "There is one ruler on my table.",
-       "example_vi": "Trên bàn em có một cái thước kẻ.",
-       "card": "f.c2281cec"
+       "ipa": "/klɑːk/",
+       "def": "A thing on the wall that shows the time.",
+       "example": "Point to the clock, please!",
+       "example_vi": "Hãy chỉ vào cái đồng hồ nào!",
+       "image": "w-clock.jpg",
+       "card": "f.04f6b3ea"
       },
       {
-       "word": "jacket",
+       "word": "tablet",
        "pos": "noun",
-       "ipa": "/ˈdʒækɪt/",
-       "def": "A short coat you wear on top of your clothes.",
-       "example": "What colour is Tom's jacket?",
-       "example_vi": "Áo khoác của Tom màu gì?",
-       "card": "f.89fba029"
+       "ipa": "/ˈtæblət/",
+       "def": "A small flat computer you touch with your finger.",
+       "example": "There is a tablet on the teacher's desk.",
+       "example_vi": "Có một chiếc máy tính bảng trên bàn cô giáo.",
+       "image": "w-tablet.jpg",
+       "card": "f.fabcacd2"
       },
       {
-       "word": "chair",
+       "word": "Monday",
        "pos": "noun",
-       "ipa": "/tʃer/",
-       "def": "A seat with a back, for one person.",
-       "example": "How many chairs are there?",
-       "example_vi": "Có bao nhiêu cái ghế?",
-       "card": "f.9feb5376"
+       "ipa": "/ˈmʌndeɪ/",
+       "def": "The first day of the school week.",
+       "example": "On Monday the children sing.",
+       "example_vi": "Vào thứ Hai các bạn hát.",
+       "card": "f.932eeb10"
+      },
+      {
+       "word": "Tuesday",
+       "pos": "noun",
+       "ipa": "/ˈtuːzdeɪ/",
+       "def": "The day after Monday.",
+       "example": "What does Marco do on Tuesday?",
+       "example_vi": "Thứ Ba Marco làm gì?",
+       "card": "f.42e43b61"
+      },
+      {
+       "word": "Wednesday",
+       "pos": "noun",
+       "ipa": "/ˈwenzdeɪ/",
+       "def": "The day after Tuesday.",
+       "example": "We read books on Wednesday.",
+       "example_vi": "Thứ Tư chúng em đọc sách.",
+       "card": "f.5656b9b7"
+      },
+      {
+       "word": "Thursday",
+       "pos": "noun",
+       "ipa": "/ˈθɜːrzdeɪ/",
+       "def": "The day after Wednesday.",
+       "example": "Marco paints on Thursday.",
+       "example_vi": "Thứ Năm Marco vẽ tranh.",
+       "card": "f.76031ddf"
+      },
+      {
+       "word": "Friday",
+       "pos": "noun",
+       "ipa": "/ˈfraɪdeɪ/",
+       "def": "The last day of the school week.",
+       "example": "On Friday we play games.",
+       "example_vi": "Thứ Sáu chúng em chơi trò chơi.",
+       "card": "f.d166e844"
+      },
+      {
+       "word": "Saturday",
+       "pos": "noun",
+       "ipa": "/ˈsætərdeɪ/",
+       "def": "The day after Friday, when there is no school.",
+       "example": "I stay at home on Saturday.",
+       "example_vi": "Thứ Bảy em ở nhà.",
+       "card": "f.17063c50"
+      },
+      {
+       "word": "Sunday",
+       "pos": "noun",
+       "ipa": "/ˈsʌndeɪ/",
+       "def": "The day after Saturday, when there is no school.",
+       "example": "On Sunday my family goes to the park.",
+       "example_vi": "Chủ nhật gia đình em đi công viên.",
+       "card": "f.bc5dd045"
       }
      ]
     }
@@ -256,82 +297,10 @@
    ],
    "words": [
     {
-     "title": "Days of the week and kinds of books",
-     "page": "16-17",
+     "title": "Real and make-believe books",
+     "page": "17",
      "concept": "c.esl2.u1.classroom",
      "items": [
-      {
-       "word": "Monday",
-       "pos": "noun",
-       "ipa": "/ˈmʌndeɪ/",
-       "def": "The first day of the school week.",
-       "example": "On Monday the children sing.",
-       "example_vi": "Vào thứ Hai các bạn hát.",
-       "card": "f.932eeb10"
-      },
-      {
-       "word": "Tuesday",
-       "pos": "noun",
-       "ipa": "/ˈtuːzdeɪ/",
-       "def": "The day after Monday.",
-       "example": "What does Marco do on Tuesday?",
-       "example_vi": "Thứ Ba Marco làm gì?",
-       "card": "f.42e43b61"
-      },
-      {
-       "word": "Wednesday",
-       "pos": "noun",
-       "ipa": "/ˈwenzdeɪ/",
-       "def": "The day after Tuesday.",
-       "example": "We read books on Wednesday.",
-       "example_vi": "Thứ Tư chúng em đọc sách.",
-       "card": "f.5656b9b7"
-      },
-      {
-       "word": "Thursday",
-       "pos": "noun",
-       "ipa": "/ˈθɜːrzdeɪ/",
-       "def": "The day after Wednesday.",
-       "example": "Marco paints on Thursday.",
-       "example_vi": "Thứ Năm Marco vẽ tranh.",
-       "card": "f.76031ddf"
-      },
-      {
-       "word": "Friday",
-       "pos": "noun",
-       "ipa": "/ˈfraɪdeɪ/",
-       "def": "The last day of the school week.",
-       "example": "On Friday we play games.",
-       "example_vi": "Thứ Sáu chúng em chơi trò chơi.",
-       "card": "f.d166e844"
-      },
-      {
-       "word": "Saturday",
-       "pos": "noun",
-       "ipa": "/ˈsætərdeɪ/",
-       "def": "The day after Friday, when there is no school.",
-       "example": "I stay at home on Saturday.",
-       "example_vi": "Thứ Bảy em ở nhà.",
-       "card": "f.17063c50"
-      },
-      {
-       "word": "Sunday",
-       "pos": "noun",
-       "ipa": "/ˈsʌndeɪ/",
-       "def": "The day after Saturday, when there is no school.",
-       "example": "On Sunday my family goes to the park.",
-       "example_vi": "Chủ nhật gia đình em đi công viên.",
-       "card": "f.bc5dd045"
-      },
-      {
-       "word": "o'clock",
-       "pos": "adverb",
-       "ipa": "/əˈklɑːk/",
-       "def": "A word you say after the hour when the time has no extra minutes.",
-       "example": "It's three o'clock.",
-       "example_vi": "Bây giờ là ba giờ.",
-       "card": "f.e519736b"
-      },
       {
        "word": "character",
        "pos": "noun",
@@ -339,6 +308,7 @@
        "def": "A person or animal in a story.",
        "example": "The people or animals in a story are called characters.",
        "example_vi": "Người hoặc con vật trong một câu chuyện được gọi là nhân vật.",
+       "image": "w-character.jpg",
        "card": "f.ee9946c8"
       },
       {
@@ -348,6 +318,7 @@
        "def": "Not real, only in someone's imagination.",
        "example": "Stories are not real; they are make-believe.",
        "example_vi": "Truyện không có thật; đó là chuyện tưởng tượng.",
+       "image": "w-make-believe.jpg",
        "card": "f.07d902d8"
       },
       {
@@ -357,6 +328,7 @@
        "def": "Facts that are true and that you can learn from.",
        "example": "Some books give real information.",
        "example_vi": "Có những quyển sách cho thông tin có thật.",
+       "image": "w-information.jpg",
        "card": "f.0eb5ed50"
       }
      ]
@@ -406,7 +378,7 @@
    "words": [
     {
      "title": "Parts of a book",
-     "page": "18-19",
+     "page": "18",
      "concept": "c.esl2.u1.book",
      "items": [
       {
@@ -416,6 +388,7 @@
        "def": "The name of a book or story.",
        "example": "What is the title of the book?",
        "example_vi": "Tên quyển sách này là gì?",
+       "image": "w-title.jpg",
        "card": "f.768e0c1c"
       },
       {
@@ -425,43 +398,8 @@
        "def": "The writer of a book.",
        "example": "Who is the author of the book?",
        "example_vi": "Ai là tác giả của quyển sách?",
+       "image": "w-author.jpg",
        "card": "f.5fda23d6"
-      },
-      {
-       "word": "cover",
-       "pos": "noun",
-       "ipa": "/ˈkʌvər/",
-       "def": "The outside of a book, with the title on it.",
-       "example": "Draw the cover of a book you would like to read.",
-       "example_vi": "Hãy vẽ bìa một quyển sách em muốn đọc.",
-       "card": "f.8b656a5d"
-      },
-      {
-       "word": "contents page",
-       "pos": "noun",
-       "ipa": "/ˈkɑːntents peɪdʒ/",
-       "def": "A page at the beginning of a book that tells you what is in it.",
-       "example": "A contents page is at the beginning of a book.",
-       "example_vi": "Trang mục lục nằm ở đầu quyển sách.",
-       "card": "f.072a5a09"
-      },
-      {
-       "word": "chapter",
-       "pos": "noun",
-       "ipa": "/ˈtʃæptər/",
-       "def": "One part of a book, with its own name.",
-       "example": "There are four chapters in this book.",
-       "example_vi": "Quyển sách này có bốn chương.",
-       "card": "f.46b00590"
-      },
-      {
-       "word": "page",
-       "pos": "noun",
-       "ipa": "/peɪdʒ/",
-       "def": "One sheet of a book, with a number on it.",
-       "example": "Which page will you look at?",
-       "example_vi": "Em sẽ xem trang nào?",
-       "card": "f.fb06270f"
       }
      ]
     }
@@ -573,13 +511,54 @@
      "concept": "c.esl2.u1.possessions",
      "items": [
       {
-       "word": "backpack",
+       "word": "ball",
        "pos": "noun",
-       "ipa": "/ˈbækpæk/",
-       "def": "A bag you carry on your back.",
-       "example": "Whose backpack is it?",
-       "example_vi": "Cái ba lô này của ai?",
-       "card": "f.0ccf90eb"
+       "ipa": "/bɔːl/",
+       "def": "A round thing you kick, throw or catch.",
+       "example": "He has a ball in his backpack.",
+       "example_vi": "Bạn ấy có một quả bóng trong ba lô.",
+       "image": "w-ball.jpg",
+       "card": "f.3d373949"
+      },
+      {
+       "word": "skipping rope",
+       "pos": "noun",
+       "ipa": "/ˈskɪpɪŋ roʊp/",
+       "def": "A rope you jump over again and again.",
+       "example": "There is a skipping rope in Jill's backpack.",
+       "example_vi": "Trong ba lô của Jill có một sợi dây nhảy.",
+       "image": "w-skipping-rope.jpg",
+       "card": "f.2c64608e"
+      },
+      {
+       "word": "phone",
+       "pos": "noun",
+       "ipa": "/foʊn/",
+       "def": "A small thing you use to talk to someone far away.",
+       "example": "Her phone is in the yellow backpack.",
+       "example_vi": "Điện thoại của bạn ấy ở trong cái ba lô vàng.",
+       "image": "w-phone.png",
+       "card": "f.77064d52"
+      },
+      {
+       "word": "jumper",
+       "pos": "noun",
+       "ipa": "/ˈdʒʌmpər/",
+       "def": "A warm top you pull over your head.",
+       "example": "She has a yellow jumper.",
+       "example_vi": "Bạn ấy có một chiếc áo len màu vàng.",
+       "image": "w-jumper.png",
+       "card": "f.dfda5bd9"
+      },
+      {
+       "word": "pencil",
+       "pos": "noun",
+       "ipa": "/ˈpensl/",
+       "def": "A thin stick you write and draw with.",
+       "example": "There is a pencil in my lunchbox.",
+       "example_vi": "Có một cái bút chì trong hộp cơm của em.",
+       "image": "w-pencil.jpg",
+       "card": "f.5136ae1b"
       },
       {
        "word": "lunchbox",
@@ -588,6 +567,7 @@
        "def": "A box you carry your lunch in.",
        "example": "She has a lunchbox in her backpack.",
        "example_vi": "Bạn ấy có một hộp cơm trưa trong ba lô.",
+       "image": "w-lunchbox.jpg",
        "card": "f.378bd828"
       },
       {
@@ -597,16 +577,8 @@
        "def": "A small book of empty pages for writing in.",
        "example": "He has a notebook and a pencil.",
        "example_vi": "Bạn ấy có một quyển vở và một cái bút chì.",
+       "image": "w-notebook.jpg",
        "card": "f.cbe152fd"
-      },
-      {
-       "word": "skipping rope",
-       "pos": "noun",
-       "ipa": "/ˈskɪpɪŋ roʊp/",
-       "def": "A rope you jump over again and again.",
-       "example": "There is a skipping rope in Jill's backpack.",
-       "example_vi": "Trong ba lô của Jill có một sợi dây nhảy.",
-       "card": "f.2c64608e"
       },
       {
        "word": "sunglasses",
@@ -615,16 +587,8 @@
        "def": "Dark glasses you wear when the sun is bright.",
        "example": "He wears sunglasses on the field trip.",
        "example_vi": "Bạn ấy đeo kính râm khi đi dã ngoại.",
+       "image": "w-sunglasses.jpg",
        "card": "f.849f3f78"
-      },
-      {
-       "word": "phone",
-       "pos": "noun",
-       "ipa": "/foʊn/",
-       "def": "A small thing you use to talk to someone far away.",
-       "example": "Her phone is in the yellow backpack.",
-       "example_vi": "Điện thoại của bạn ấy ở trong cái ba lô vàng.",
-       "card": "f.77064d52"
       },
       {
        "word": "hat",
@@ -633,16 +597,8 @@
        "def": "Something you wear on your head.",
        "example": "He has a hat and two keys.",
        "example_vi": "Bạn ấy có một cái mũ và hai chiếc chìa khoá.",
+       "image": "w-hat.jpg",
        "card": "f.0b5ad7f0"
-      },
-      {
-       "word": "jumper",
-       "pos": "noun",
-       "ipa": "/ˈdʒʌmpər/",
-       "def": "A warm top you pull over your head.",
-       "example": "She has a yellow jumper.",
-       "example_vi": "Bạn ấy có một chiếc áo len màu vàng.",
-       "card": "f.dfda5bd9"
       },
       {
        "word": "key",
@@ -651,16 +607,8 @@
        "def": "A small metal thing that opens a lock.",
        "example": "He has two keys.",
        "example_vi": "Bạn ấy có hai chiếc chìa khoá.",
+       "image": "w-key.jpg",
        "card": "f.c67dd20e"
-      },
-      {
-       "word": "pencil",
-       "pos": "noun",
-       "ipa": "/ˈpensl/",
-       "def": "A thin stick you write and draw with.",
-       "example": "There is a pencil in my lunchbox.",
-       "example_vi": "Có một cái bút chì trong hộp cơm của em.",
-       "card": "f.5136ae1b"
       }
      ]
     }
@@ -710,27 +658,28 @@
    "grammar": [],
    "words": [
     {
-     "title": "Short vowel words and two-letter sounds",
+     "title": "Vowels, consonants and sound words",
      "page": "22-23",
      "concept": "c.esl2.u1.vowels",
      "items": [
       {
-       "word": "apple",
+       "word": "vowel",
        "pos": "noun",
-       "ipa": "/ˈæpl/",
-       "def": "A round red or green fruit.",
-       "example": "Apple starts with the short a sound.",
-       "example_vi": "Từ apple bắt đầu bằng âm a ngắn.",
-       "card": "f.476432a3"
+       "ipa": "/ˈvaʊəl/",
+       "def": "One of the five letters A, E, I, O and U.",
+       "example": "A, E, I, O and U are vowels.",
+       "example_vi": "A, E, I, O, U là các nguyên âm.",
+       "image": "w-vowel.png",
+       "card": "f.135858db"
       },
       {
-       "word": "egg",
+       "word": "consonant",
        "pos": "noun",
-       "ipa": "/eɡ/",
-       "def": "The round thing a bird lays, which we can eat.",
-       "example": "Egg starts with the short e sound.",
-       "example_vi": "Từ egg bắt đầu bằng âm e ngắn.",
-       "card": "f.32c9bcb1"
+       "ipa": "/ˈkɑːnsənənt/",
+       "def": "Any letter that is not a vowel.",
+       "example": "Some letters are called consonants and some are called vowels.",
+       "example_vi": "Có những chữ cái gọi là phụ âm và có những chữ gọi là nguyên âm.",
+       "card": "f.ad7644fe"
       },
       {
        "word": "insect",
@@ -739,16 +688,8 @@
        "def": "A small animal with six legs, like an ant.",
        "example": "Insect starts with the short i sound.",
        "example_vi": "Từ insect bắt đầu bằng âm i ngắn.",
+       "image": "w-insect.png",
        "card": "f.dd3bffea"
-      },
-      {
-       "word": "octopus",
-       "pos": "noun",
-       "ipa": "/ˈɑːktəpʊs/",
-       "def": "A sea animal with eight arms.",
-       "example": "Octopus starts with the short o sound.",
-       "example_vi": "Từ octopus bắt đầu bằng âm o ngắn.",
-       "card": "f.c10a60e4"
       },
       {
        "word": "umbrella",
@@ -757,34 +698,48 @@
        "def": "A thing you hold over your head in the rain.",
        "example": "Umbrella starts with the short u sound.",
        "example_vi": "Từ umbrella bắt đầu bằng âm u ngắn.",
+       "image": "w-umbrella.png",
        "card": "f.483fed9c"
       },
       {
-       "word": "ship",
+       "word": "egg",
        "pos": "noun",
-       "ipa": "/ʃɪp/",
-       "def": "A big boat that carries people across the sea.",
-       "example": "Ship begins with the sh sound.",
-       "example_vi": "Từ ship bắt đầu bằng âm sh.",
-       "card": "f.323d4fc7"
+       "ipa": "/eɡ/",
+       "def": "The round thing a bird lays, which we can eat.",
+       "example": "Egg starts with the short e sound.",
+       "example_vi": "Từ egg bắt đầu bằng âm e ngắn.",
+       "image": "w-egg.png",
+       "card": "f.32c9bcb1"
       },
       {
-       "word": "chips",
+       "word": "octopus",
        "pos": "noun",
-       "ipa": "/tʃɪps/",
-       "def": "Long thin pieces of potato that are cooked in oil.",
-       "example": "Chips begins with the ch sound.",
-       "example_vi": "Từ chips bắt đầu bằng âm ch.",
-       "card": "f.990807f5"
+       "ipa": "/ˈɑːktəpʊs/",
+       "def": "A sea animal with eight arms.",
+       "example": "Octopus starts with the short o sound.",
+       "example_vi": "Từ octopus bắt đầu bằng âm o ngắn.",
+       "image": "w-octopus.png",
+       "card": "f.c10a60e4"
       },
       {
-       "word": "maths",
+       "word": "apple",
        "pos": "noun",
-       "ipa": "/mæθs/",
-       "def": "The lesson where you work with numbers and shapes.",
-       "example": "Maths ends with the th sound.",
-       "example_vi": "Từ maths kết thúc bằng âm th.",
-       "card": "f.33b87775"
+       "ipa": "/ˈæpl/",
+       "def": "A round red or green fruit.",
+       "example": "Apple starts with the short a sound.",
+       "example_vi": "Từ apple bắt đầu bằng âm a ngắn.",
+       "image": "w-apple.png",
+       "card": "f.476432a3"
+      },
+      {
+       "word": "cat",
+       "pos": "noun",
+       "ipa": "/kæt/",
+       "def": "A small furry animal many people keep at home.",
+       "example": "The cat has the short a sound in the middle.",
+       "example_vi": "Từ cat có âm a ngắn ở giữa.",
+       "image": "w-cat.png",
+       "card": "f.cebe54c7"
       },
       {
        "word": "catch",
@@ -793,7 +748,88 @@
        "def": "To take hold of something moving through the air.",
        "example": "Catch ends with the tch letters.",
        "example_vi": "Từ catch kết thúc bằng cụm chữ tch.",
+       "image": "w-catch.png",
        "card": "f.a7c51e67"
+      },
+      {
+       "word": "cut",
+       "pos": "verb",
+       "ipa": "/kʌt/",
+       "def": "To open or divide something with scissors or a knife.",
+       "example": "Cut has the short u sound in the middle.",
+       "example_vi": "Từ cut có âm u ngắn ở giữa.",
+       "image": "w-cut.png",
+       "card": "f.38d13bda"
+      },
+      {
+       "word": "maths",
+       "pos": "noun",
+       "ipa": "/mæθs/",
+       "def": "The lesson where you work with numbers and shapes.",
+       "example": "Maths ends with the th sound.",
+       "example_vi": "Từ maths kết thúc bằng âm th.",
+       "image": "w-maths.png",
+       "card": "f.33b87775"
+      },
+      {
+       "word": "pen",
+       "pos": "noun",
+       "ipa": "/pen/",
+       "def": "A thin tool you write with, using ink.",
+       "example": "How do you spell it? P-e-n.",
+       "example_vi": "Từ đó đánh vần thế nào? P-e-n.",
+       "image": "w-pen.png",
+       "card": "f.cf6c07e7"
+      },
+      {
+       "word": "chips",
+       "pos": "noun",
+       "ipa": "/tʃɪps/",
+       "def": "Long thin pieces of potato that are cooked in oil.",
+       "example": "Chips begins with the ch sound.",
+       "example_vi": "Từ chips bắt đầu bằng âm ch.",
+       "image": "w-chips.png",
+       "card": "f.990807f5"
+      },
+      {
+       "word": "ship",
+       "pos": "noun",
+       "ipa": "/ʃɪp/",
+       "def": "A big boat that carries people across the sea.",
+       "example": "Ship begins with the sh sound.",
+       "example_vi": "Từ ship bắt đầu bằng âm sh.",
+       "image": "w-ship.png",
+       "card": "f.323d4fc7"
+      },
+      {
+       "word": "shop",
+       "pos": "noun",
+       "ipa": "/ʃɑːp/",
+       "def": "A place where you buy things.",
+       "example": "Shop begins with the sh sound.",
+       "example_vi": "Từ shop bắt đầu bằng âm sh.",
+       "image": "w-shop.png",
+       "card": "f.55de8870"
+      },
+      {
+       "word": "rock",
+       "pos": "noun",
+       "ipa": "/rɑːk/",
+       "def": "A hard piece of stone.",
+       "example": "Rock has the short o sound in the middle.",
+       "example_vi": "Từ rock có âm o ngắn ở giữa.",
+       "image": "w-rock.png",
+       "card": "f.468d79c2"
+      },
+      {
+       "word": "fifth",
+       "pos": "adjective",
+       "ipa": "/fɪfθ/",
+       "def": "Coming after the fourth one.",
+       "example": "Fifth ends with the th sound.",
+       "example_vi": "Từ fifth kết thúc bằng âm th.",
+       "image": "w-fifth.png",
+       "card": "f.0e4a8a8e"
       }
      ]
     }
@@ -928,105 +964,7 @@
      "watch": "Ask first: am I writing alone, or with my class?"
     }
    ],
-   "words": [
-    {
-     "title": "School day words",
-     "page": "24-26",
-     "concept": "c.esl2.u1.myschool",
-     "items": [
-      {
-       "word": "grade",
-       "pos": "noun",
-       "ipa": "/ɡreɪd/",
-       "def": "The school year a child is in.",
-       "example": "I am in the second grade.",
-       "example_vi": "Em học lớp hai.",
-       "card": "f.aecc49c1"
-      },
-      {
-       "word": "curtain",
-       "pos": "noun",
-       "ipa": "/ˈkɜːrtn/",
-       "def": "Cloth that hangs over a window.",
-       "example": "There are windows with curtains.",
-       "example_vi": "Có những ô cửa sổ treo rèm.",
-       "card": "f.9cfa0391"
-      },
-      {
-       "word": "artwork",
-       "pos": "noun",
-       "ipa": "/ˈɑːrtwɜːrk/",
-       "def": "Pictures and other things children make in art class.",
-       "example": "My teacher puts our artwork on the board.",
-       "example_vi": "Cô giáo dán tranh của chúng em lên bảng.",
-       "card": "f.bfbeaf93"
-      },
-      {
-       "word": "electricity",
-       "pos": "noun",
-       "ipa": "/ɪˌlekˈtrɪsəti/",
-       "def": "The power that makes lights and machines work.",
-       "example": "In science class we study electricity.",
-       "example_vi": "Trong giờ khoa học chúng em học về điện.",
-       "card": "f.925cf7f2"
-      },
-      {
-       "word": "experiment",
-       "pos": "noun",
-       "ipa": "/ɪkˈsperɪmənt/",
-       "def": "A test you do to find out if something is true.",
-       "example": "We do experiments in science class.",
-       "example_vi": "Chúng em làm thí nghiệm trong giờ khoa học.",
-       "card": "f.ad6e4fcf"
-      },
-      {
-       "word": "battery",
-       "pos": "noun",
-       "ipa": "/ˈbætəri/",
-       "def": "A small thing that stores electricity.",
-       "example": "We use batteries and wires to make a light bulb turn on.",
-       "example_vi": "Chúng em dùng pin và dây điện để làm bóng đèn sáng lên.",
-       "card": "f.4a9be042"
-      },
-      {
-       "word": "wire",
-       "pos": "noun",
-       "ipa": "/ˈwaɪər/",
-       "def": "A thin metal string that electricity can travel along.",
-       "example": "The wire joins the battery to the light bulb.",
-       "example_vi": "Sợi dây điện nối viên pin với bóng đèn.",
-       "card": "f.663953f7"
-      },
-      {
-       "word": "break time",
-       "pos": "noun",
-       "ipa": "/ˈbreɪk taɪm/",
-       "def": "The short rest between lessons.",
-       "example": "I have 15 minutes for break time.",
-       "example_vi": "Em có 15 phút giờ ra chơi.",
-       "card": "f.11747ba3"
-      },
-      {
-       "word": "snack",
-       "pos": "noun",
-       "ipa": "/snæk/",
-       "def": "A small amount of food between meals.",
-       "example": "I have a snack. I eat dried mango.",
-       "example_vi": "Em ăn nhẹ. Em ăn xoài sấy.",
-       "card": "f.071a0788"
-      },
-      {
-       "word": "tidy up",
-       "pos": "verb",
-       "ipa": "/ˈtaɪdi ʌp/",
-       "def": "To put things back where they belong.",
-       "example": "It's almost 2:00. I tidy up my desk.",
-       "example_vi": "Sắp hai giờ rồi. Em dọn gọn bàn học.",
-       "card": "f.41ad80b5"
-      }
-     ]
-    }
-   ],
+   "words": [],
    "sounds": [],
    "phrases": [
     {
@@ -1085,11 +1023,11 @@
   },
   {
    "id": "f.081b17c8",
-   "concept": "c.esl2.u1.classroom",
+   "concept": "c.esl2.u1.words",
    "front_en": "How many days are there in a week?",
    "back_en": "Seven: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday and Sunday.",
    "back_vi": "Bảy ngày: thứ Hai, thứ Ba, thứ Tư, thứ Năm, thứ Sáu, thứ Bảy và Chủ nhật.",
-   "example_en": "p.16"
+   "example_en": "p.14"
   },
   {
    "id": "f.ae09b5f9",
@@ -1147,7 +1085,8 @@
    "example_en": "There is a tablet on the teacher's desk.",
    "example_vi": "Có một chiếc máy tính bảng trên bàn cô giáo.",
    "kind": "term",
-   "ipa": "/ˈtæblət/"
+   "ipa": "/ˈtæblət/",
+   "image": "w-tablet.jpg"
   },
   {
    "id": "f.04f6b3ea",
@@ -1157,7 +1096,8 @@
    "example_en": "Point to the clock, please!",
    "example_vi": "Hãy chỉ vào cái đồng hồ nào!",
    "kind": "term",
-   "ipa": "/klɑːk/"
+   "ipa": "/klɑːk/",
+   "image": "w-clock.jpg"
   },
   {
    "id": "f.adab5090",
@@ -1167,7 +1107,8 @@
    "example_en": "There is a world map and a calendar on the wall.",
    "example_vi": "Trên tường có một tấm bản đồ thế giới và một tờ lịch.",
    "kind": "term",
-   "ipa": "/ˈkæləndər/"
+   "ipa": "/ˈkæləndər/",
+   "image": "w-calendar.png"
   },
   {
    "id": "f.ab478f3e",
@@ -1177,7 +1118,8 @@
    "example_en": "We look at the map to find our country.",
    "example_vi": "Chúng em nhìn bản đồ để tìm nước mình.",
    "kind": "term",
-   "ipa": "/mæp/"
+   "ipa": "/mæp/",
+   "image": "w-map.png"
   },
   {
    "id": "f.f69f2330",
@@ -1187,41 +1129,12 @@
    "example_en": "When I open up a book, each page whispers, 'Look!'",
    "example_vi": "Khi em mở một quyển sách, mỗi trang lại thì thầm: 'Nhìn kìa!'",
    "kind": "term",
-   "ipa": "/bʊk/"
-  },
-  {
-   "id": "f.c2281cec",
-   "concept": "c.esl2.u1.words",
-   "front_en": "Ruler",
-   "back_en": "A straight stick you use to measure and to draw lines.",
-   "example_en": "There is one ruler on my table.",
-   "example_vi": "Trên bàn em có một cái thước kẻ.",
-   "kind": "term",
-   "ipa": "/ˈruːlər/"
-  },
-  {
-   "id": "f.89fba029",
-   "concept": "c.esl2.u1.words",
-   "front_en": "Jacket",
-   "back_en": "A short coat you wear on top of your clothes.",
-   "example_en": "What colour is Tom's jacket?",
-   "example_vi": "Áo khoác của Tom màu gì?",
-   "kind": "term",
-   "ipa": "/ˈdʒækɪt/"
-  },
-  {
-   "id": "f.9feb5376",
-   "concept": "c.esl2.u1.words",
-   "front_en": "Chair",
-   "back_en": "A seat with a back, for one person.",
-   "example_en": "How many chairs are there?",
-   "example_vi": "Có bao nhiêu cái ghế?",
-   "kind": "term",
-   "ipa": "/tʃer/"
+   "ipa": "/bʊk/",
+   "image": "w-book.png"
   },
   {
    "id": "f.932eeb10",
-   "concept": "c.esl2.u1.classroom",
+   "concept": "c.esl2.u1.words",
    "front_en": "Monday",
    "back_en": "The first day of the school week.",
    "example_en": "On Monday the children sing.",
@@ -1231,7 +1144,7 @@
   },
   {
    "id": "f.42e43b61",
-   "concept": "c.esl2.u1.classroom",
+   "concept": "c.esl2.u1.words",
    "front_en": "Tuesday",
    "back_en": "The day after Monday.",
    "example_en": "What does Marco do on Tuesday?",
@@ -1241,7 +1154,7 @@
   },
   {
    "id": "f.5656b9b7",
-   "concept": "c.esl2.u1.classroom",
+   "concept": "c.esl2.u1.words",
    "front_en": "Wednesday",
    "back_en": "The day after Tuesday.",
    "example_en": "We read books on Wednesday.",
@@ -1251,7 +1164,7 @@
   },
   {
    "id": "f.76031ddf",
-   "concept": "c.esl2.u1.classroom",
+   "concept": "c.esl2.u1.words",
    "front_en": "Thursday",
    "back_en": "The day after Wednesday.",
    "example_en": "Marco paints on Thursday.",
@@ -1261,7 +1174,7 @@
   },
   {
    "id": "f.d166e844",
-   "concept": "c.esl2.u1.classroom",
+   "concept": "c.esl2.u1.words",
    "front_en": "Friday",
    "back_en": "The last day of the school week.",
    "example_en": "On Friday we play games.",
@@ -1271,7 +1184,7 @@
   },
   {
    "id": "f.17063c50",
-   "concept": "c.esl2.u1.classroom",
+   "concept": "c.esl2.u1.words",
    "front_en": "Saturday",
    "back_en": "The day after Friday, when there is no school.",
    "example_en": "I stay at home on Saturday.",
@@ -1281,23 +1194,13 @@
   },
   {
    "id": "f.bc5dd045",
-   "concept": "c.esl2.u1.classroom",
+   "concept": "c.esl2.u1.words",
    "front_en": "Sunday",
    "back_en": "The day after Saturday, when there is no school.",
    "example_en": "On Sunday my family goes to the park.",
    "example_vi": "Chủ nhật gia đình em đi công viên.",
    "kind": "term",
    "ipa": "/ˈsʌndeɪ/"
-  },
-  {
-   "id": "f.e519736b",
-   "concept": "c.esl2.u1.classroom",
-   "front_en": "O'clock",
-   "back_en": "A word you say after the hour when the time has no extra minutes.",
-   "example_en": "It's three o'clock.",
-   "example_vi": "Bây giờ là ba giờ.",
-   "kind": "term",
-   "ipa": "/əˈklɑːk/"
   },
   {
    "id": "f.ee9946c8",
@@ -1307,7 +1210,8 @@
    "example_en": "The people or animals in a story are called characters.",
    "example_vi": "Người hoặc con vật trong một câu chuyện được gọi là nhân vật.",
    "kind": "term",
-   "ipa": "/ˈkerəktər/"
+   "ipa": "/ˈkerəktər/",
+   "image": "w-character.jpg"
   },
   {
    "id": "f.07d902d8",
@@ -1317,7 +1221,8 @@
    "example_en": "Stories are not real; they are make-believe.",
    "example_vi": "Truyện không có thật; đó là chuyện tưởng tượng.",
    "kind": "term",
-   "ipa": "/ˈmeɪk bɪliːv/"
+   "ipa": "/ˈmeɪk bɪliːv/",
+   "image": "w-make-believe.jpg"
   },
   {
    "id": "f.0eb5ed50",
@@ -1327,7 +1232,8 @@
    "example_en": "Some books give real information.",
    "example_vi": "Có những quyển sách cho thông tin có thật.",
    "kind": "term",
-   "ipa": "/ˌɪnfərˈmeɪʃn/"
+   "ipa": "/ˌɪnfərˈmeɪʃn/",
+   "image": "w-information.jpg"
   },
   {
    "id": "f.768e0c1c",
@@ -1337,7 +1243,8 @@
    "example_en": "What is the title of the book?",
    "example_vi": "Tên quyển sách này là gì?",
    "kind": "term",
-   "ipa": "/ˈtaɪtl/"
+   "ipa": "/ˈtaɪtl/",
+   "image": "w-title.jpg"
   },
   {
    "id": "f.5fda23d6",
@@ -1347,57 +1254,8 @@
    "example_en": "Who is the author of the book?",
    "example_vi": "Ai là tác giả của quyển sách?",
    "kind": "term",
-   "ipa": "/ˈɔːθər/"
-  },
-  {
-   "id": "f.8b656a5d",
-   "concept": "c.esl2.u1.book",
-   "front_en": "Cover",
-   "back_en": "The outside of a book, with the title on it.",
-   "example_en": "Draw the cover of a book you would like to read.",
-   "example_vi": "Hãy vẽ bìa một quyển sách em muốn đọc.",
-   "kind": "term",
-   "ipa": "/ˈkʌvər/"
-  },
-  {
-   "id": "f.072a5a09",
-   "concept": "c.esl2.u1.book",
-   "front_en": "Contents page",
-   "back_en": "A page at the beginning of a book that tells you what is in it.",
-   "example_en": "A contents page is at the beginning of a book.",
-   "example_vi": "Trang mục lục nằm ở đầu quyển sách.",
-   "kind": "term",
-   "ipa": "/ˈkɑːntents peɪdʒ/"
-  },
-  {
-   "id": "f.46b00590",
-   "concept": "c.esl2.u1.book",
-   "front_en": "Chapter",
-   "back_en": "One part of a book, with its own name.",
-   "example_en": "There are four chapters in this book.",
-   "example_vi": "Quyển sách này có bốn chương.",
-   "kind": "term",
-   "ipa": "/ˈtʃæptər/"
-  },
-  {
-   "id": "f.fb06270f",
-   "concept": "c.esl2.u1.book",
-   "front_en": "Page",
-   "back_en": "One sheet of a book, with a number on it.",
-   "example_en": "Which page will you look at?",
-   "example_vi": "Em sẽ xem trang nào?",
-   "kind": "term",
-   "ipa": "/peɪdʒ/"
-  },
-  {
-   "id": "f.0ccf90eb",
-   "concept": "c.esl2.u1.possessions",
-   "front_en": "Backpack",
-   "back_en": "A bag you carry on your back.",
-   "example_en": "Whose backpack is it?",
-   "example_vi": "Cái ba lô này của ai?",
-   "kind": "term",
-   "ipa": "/ˈbækpæk/"
+   "ipa": "/ˈɔːθər/",
+   "image": "w-author.jpg"
   },
   {
    "id": "f.378bd828",
@@ -1407,7 +1265,8 @@
    "example_en": "She has a lunchbox in her backpack.",
    "example_vi": "Bạn ấy có một hộp cơm trưa trong ba lô.",
    "kind": "term",
-   "ipa": "/ˈlʌntʃbɑːks/"
+   "ipa": "/ˈlʌntʃbɑːks/",
+   "image": "w-lunchbox.jpg"
   },
   {
    "id": "f.cbe152fd",
@@ -1417,7 +1276,8 @@
    "example_en": "He has a notebook and a pencil.",
    "example_vi": "Bạn ấy có một quyển vở và một cái bút chì.",
    "kind": "term",
-   "ipa": "/ˈnoʊtbʊk/"
+   "ipa": "/ˈnoʊtbʊk/",
+   "image": "w-notebook.jpg"
   },
   {
    "id": "f.2c64608e",
@@ -1427,7 +1287,8 @@
    "example_en": "There is a skipping rope in Jill's backpack.",
    "example_vi": "Trong ba lô của Jill có một sợi dây nhảy.",
    "kind": "term",
-   "ipa": "/ˈskɪpɪŋ roʊp/"
+   "ipa": "/ˈskɪpɪŋ roʊp/",
+   "image": "w-skipping-rope.jpg"
   },
   {
    "id": "f.849f3f78",
@@ -1437,7 +1298,8 @@
    "example_en": "He wears sunglasses on the field trip.",
    "example_vi": "Bạn ấy đeo kính râm khi đi dã ngoại.",
    "kind": "term",
-   "ipa": "/ˈsʌnɡlæsɪz/"
+   "ipa": "/ˈsʌnɡlæsɪz/",
+   "image": "w-sunglasses.jpg"
   },
   {
    "id": "f.77064d52",
@@ -1447,7 +1309,8 @@
    "example_en": "Her phone is in the yellow backpack.",
    "example_vi": "Điện thoại của bạn ấy ở trong cái ba lô vàng.",
    "kind": "term",
-   "ipa": "/foʊn/"
+   "ipa": "/foʊn/",
+   "image": "w-phone.png"
   },
   {
    "id": "f.0b5ad7f0",
@@ -1457,7 +1320,8 @@
    "example_en": "He has a hat and two keys.",
    "example_vi": "Bạn ấy có một cái mũ và hai chiếc chìa khoá.",
    "kind": "term",
-   "ipa": "/hæt/"
+   "ipa": "/hæt/",
+   "image": "w-hat.jpg"
   },
   {
    "id": "f.dfda5bd9",
@@ -1467,7 +1331,8 @@
    "example_en": "She has a yellow jumper.",
    "example_vi": "Bạn ấy có một chiếc áo len màu vàng.",
    "kind": "term",
-   "ipa": "/ˈdʒʌmpər/"
+   "ipa": "/ˈdʒʌmpər/",
+   "image": "w-jumper.png"
   },
   {
    "id": "f.c67dd20e",
@@ -1477,7 +1342,8 @@
    "example_en": "He has two keys.",
    "example_vi": "Bạn ấy có hai chiếc chìa khoá.",
    "kind": "term",
-   "ipa": "/kiː/"
+   "ipa": "/kiː/",
+   "image": "w-key.jpg"
   },
   {
    "id": "f.5136ae1b",
@@ -1487,7 +1353,8 @@
    "example_en": "There is a pencil in my lunchbox.",
    "example_vi": "Có một cái bút chì trong hộp cơm của em.",
    "kind": "term",
-   "ipa": "/ˈpensl/"
+   "ipa": "/ˈpensl/",
+   "image": "w-pencil.jpg"
   },
   {
    "id": "f.476432a3",
@@ -1497,7 +1364,8 @@
    "example_en": "Apple starts with the short a sound.",
    "example_vi": "Từ apple bắt đầu bằng âm a ngắn.",
    "kind": "term",
-   "ipa": "/ˈæpl/"
+   "ipa": "/ˈæpl/",
+   "image": "w-apple.png"
   },
   {
    "id": "f.32c9bcb1",
@@ -1507,7 +1375,8 @@
    "example_en": "Egg starts with the short e sound.",
    "example_vi": "Từ egg bắt đầu bằng âm e ngắn.",
    "kind": "term",
-   "ipa": "/eɡ/"
+   "ipa": "/eɡ/",
+   "image": "w-egg.png"
   },
   {
    "id": "f.dd3bffea",
@@ -1517,7 +1386,8 @@
    "example_en": "Insect starts with the short i sound.",
    "example_vi": "Từ insect bắt đầu bằng âm i ngắn.",
    "kind": "term",
-   "ipa": "/ˈɪnsekt/"
+   "ipa": "/ˈɪnsekt/",
+   "image": "w-insect.png"
   },
   {
    "id": "f.c10a60e4",
@@ -1527,7 +1397,8 @@
    "example_en": "Octopus starts with the short o sound.",
    "example_vi": "Từ octopus bắt đầu bằng âm o ngắn.",
    "kind": "term",
-   "ipa": "/ˈɑːktəpʊs/"
+   "ipa": "/ˈɑːktəpʊs/",
+   "image": "w-octopus.png"
   },
   {
    "id": "f.483fed9c",
@@ -1537,7 +1408,8 @@
    "example_en": "Umbrella starts with the short u sound.",
    "example_vi": "Từ umbrella bắt đầu bằng âm u ngắn.",
    "kind": "term",
-   "ipa": "/ʌmˈbrelə/"
+   "ipa": "/ʌmˈbrelə/",
+   "image": "w-umbrella.png"
   },
   {
    "id": "f.323d4fc7",
@@ -1547,7 +1419,8 @@
    "example_en": "Ship begins with the sh sound.",
    "example_vi": "Từ ship bắt đầu bằng âm sh.",
    "kind": "term",
-   "ipa": "/ʃɪp/"
+   "ipa": "/ʃɪp/",
+   "image": "w-ship.png"
   },
   {
    "id": "f.990807f5",
@@ -1557,7 +1430,8 @@
    "example_en": "Chips begins with the ch sound.",
    "example_vi": "Từ chips bắt đầu bằng âm ch.",
    "kind": "term",
-   "ipa": "/tʃɪps/"
+   "ipa": "/tʃɪps/",
+   "image": "w-chips.png"
   },
   {
    "id": "f.33b87775",
@@ -1567,7 +1441,8 @@
    "example_en": "Maths ends with the th sound.",
    "example_vi": "Từ maths kết thúc bằng âm th.",
    "kind": "term",
-   "ipa": "/mæθs/"
+   "ipa": "/mæθs/",
+   "image": "w-maths.png"
   },
   {
    "id": "f.a7c51e67",
@@ -1577,107 +1452,106 @@
    "example_en": "Catch ends with the tch letters.",
    "example_vi": "Từ catch kết thúc bằng cụm chữ tch.",
    "kind": "term",
-   "ipa": "/kætʃ/"
+   "ipa": "/kætʃ/",
+   "image": "w-catch.png"
   },
   {
-   "id": "f.aecc49c1",
-   "concept": "c.esl2.u1.myschool",
-   "front_en": "Grade",
-   "back_en": "The school year a child is in.",
-   "example_en": "I am in the second grade.",
-   "example_vi": "Em học lớp hai.",
+   "id": "f.3d373949",
+   "concept": "c.esl2.u1.possessions",
+   "front_en": "Ball",
+   "back_en": "A round thing you kick, throw or catch.",
+   "example_en": "He has a ball in his backpack.",
+   "example_vi": "Bạn ấy có một quả bóng trong ba lô.",
    "kind": "term",
-   "ipa": "/ɡreɪd/"
+   "ipa": "/bɔːl/",
+   "image": "w-ball.jpg"
   },
   {
-   "id": "f.9cfa0391",
-   "concept": "c.esl2.u1.myschool",
-   "front_en": "Curtain",
-   "back_en": "Cloth that hangs over a window.",
-   "example_en": "There are windows with curtains.",
-   "example_vi": "Có những ô cửa sổ treo rèm.",
+   "id": "f.135858db",
+   "concept": "c.esl2.u1.vowels",
+   "front_en": "Vowel",
+   "back_en": "One of the five letters A, E, I, O and U.",
+   "example_en": "A, E, I, O and U are vowels.",
+   "example_vi": "A, E, I, O, U là các nguyên âm.",
    "kind": "term",
-   "ipa": "/ˈkɜːrtn/"
+   "ipa": "/ˈvaʊəl/",
+   "image": "w-vowel.png"
   },
   {
-   "id": "f.bfbeaf93",
-   "concept": "c.esl2.u1.myschool",
-   "front_en": "Artwork",
-   "back_en": "Pictures and other things children make in art class.",
-   "example_en": "My teacher puts our artwork on the board.",
-   "example_vi": "Cô giáo dán tranh của chúng em lên bảng.",
+   "id": "f.ad7644fe",
+   "concept": "c.esl2.u1.vowels",
+   "front_en": "Consonant",
+   "back_en": "Any letter that is not a vowel.",
+   "example_en": "Some letters are called consonants and some are called vowels.",
+   "example_vi": "Có những chữ cái gọi là phụ âm và có những chữ gọi là nguyên âm.",
    "kind": "term",
-   "ipa": "/ˈɑːrtwɜːrk/"
+   "ipa": "/ˈkɑːnsənənt/"
   },
   {
-   "id": "f.925cf7f2",
-   "concept": "c.esl2.u1.myschool",
-   "front_en": "Electricity",
-   "back_en": "The power that makes lights and machines work.",
-   "example_en": "In science class we study electricity.",
-   "example_vi": "Trong giờ khoa học chúng em học về điện.",
+   "id": "f.cebe54c7",
+   "concept": "c.esl2.u1.vowels",
+   "front_en": "Cat",
+   "back_en": "A small furry animal many people keep at home.",
+   "example_en": "The cat has the short a sound in the middle.",
+   "example_vi": "Từ cat có âm a ngắn ở giữa.",
    "kind": "term",
-   "ipa": "/ɪˌlekˈtrɪsəti/"
+   "ipa": "/kæt/",
+   "image": "w-cat.png"
   },
   {
-   "id": "f.ad6e4fcf",
-   "concept": "c.esl2.u1.myschool",
-   "front_en": "Experiment",
-   "back_en": "A test you do to find out if something is true.",
-   "example_en": "We do experiments in science class.",
-   "example_vi": "Chúng em làm thí nghiệm trong giờ khoa học.",
+   "id": "f.38d13bda",
+   "concept": "c.esl2.u1.vowels",
+   "front_en": "Cut",
+   "back_en": "To open or divide something with scissors or a knife.",
+   "example_en": "Cut has the short u sound in the middle.",
+   "example_vi": "Từ cut có âm u ngắn ở giữa.",
    "kind": "term",
-   "ipa": "/ɪkˈsperɪmənt/"
+   "ipa": "/kʌt/",
+   "image": "w-cut.png"
   },
   {
-   "id": "f.4a9be042",
-   "concept": "c.esl2.u1.myschool",
-   "front_en": "Battery",
-   "back_en": "A small thing that stores electricity.",
-   "example_en": "We use batteries and wires to make a light bulb turn on.",
-   "example_vi": "Chúng em dùng pin và dây điện để làm bóng đèn sáng lên.",
+   "id": "f.cf6c07e7",
+   "concept": "c.esl2.u1.vowels",
+   "front_en": "Pen",
+   "back_en": "A thin tool you write with, using ink.",
+   "example_en": "How do you spell it? P-e-n.",
+   "example_vi": "Từ đó đánh vần thế nào? P-e-n.",
    "kind": "term",
-   "ipa": "/ˈbætəri/"
+   "ipa": "/pen/",
+   "image": "w-pen.png"
   },
   {
-   "id": "f.663953f7",
-   "concept": "c.esl2.u1.myschool",
-   "front_en": "Wire",
-   "back_en": "A thin metal string that electricity can travel along.",
-   "example_en": "The wire joins the battery to the light bulb.",
-   "example_vi": "Sợi dây điện nối viên pin với bóng đèn.",
+   "id": "f.55de8870",
+   "concept": "c.esl2.u1.vowels",
+   "front_en": "Shop",
+   "back_en": "A place where you buy things.",
+   "example_en": "Shop begins with the sh sound.",
+   "example_vi": "Từ shop bắt đầu bằng âm sh.",
    "kind": "term",
-   "ipa": "/ˈwaɪər/"
+   "ipa": "/ʃɑːp/",
+   "image": "w-shop.png"
   },
   {
-   "id": "f.11747ba3",
-   "concept": "c.esl2.u1.myschool",
-   "front_en": "Break time",
-   "back_en": "The short rest between lessons.",
-   "example_en": "I have 15 minutes for break time.",
-   "example_vi": "Em có 15 phút giờ ra chơi.",
+   "id": "f.468d79c2",
+   "concept": "c.esl2.u1.vowels",
+   "front_en": "Rock",
+   "back_en": "A hard piece of stone.",
+   "example_en": "Rock has the short o sound in the middle.",
+   "example_vi": "Từ rock có âm o ngắn ở giữa.",
    "kind": "term",
-   "ipa": "/ˈbreɪk taɪm/"
+   "ipa": "/rɑːk/",
+   "image": "w-rock.png"
   },
   {
-   "id": "f.071a0788",
-   "concept": "c.esl2.u1.myschool",
-   "front_en": "Snack",
-   "back_en": "A small amount of food between meals.",
-   "example_en": "I have a snack. I eat dried mango.",
-   "example_vi": "Em ăn nhẹ. Em ăn xoài sấy.",
+   "id": "f.0e4a8a8e",
+   "concept": "c.esl2.u1.vowels",
+   "front_en": "Fifth",
+   "back_en": "Coming after the fourth one.",
+   "example_en": "Fifth ends with the th sound.",
+   "example_vi": "Từ fifth kết thúc bằng âm th.",
    "kind": "term",
-   "ipa": "/snæk/"
-  },
-  {
-   "id": "f.41ad80b5",
-   "concept": "c.esl2.u1.myschool",
-   "front_en": "Tidy up",
-   "back_en": "To put things back where they belong.",
-   "example_en": "It's almost 2:00. I tidy up my desk.",
-   "example_vi": "Sắp hai giờ rồi. Em dọn gọn bàn học.",
-   "kind": "term",
-   "ipa": "/ˈtaɪdi ʌp/"
+   "ipa": "/fɪfθ/",
+   "image": "w-fifth.png"
   }
  ],
  "quiz": [
@@ -1915,8 +1789,8 @@
   },
   {
    "id": "q.0176bdce",
-   "concept": "c.esl2.u1.classroom",
-   "page": 16,
+   "concept": "c.esl2.u1.words",
+   "page": 14,
    "difficulty": 1,
    "stem_en": "Which day comes straight after Monday?",
    "stem_vi": "Ngày nào đứng ngay sau thứ Hai?",
@@ -2640,5 +2514,5 @@
   }
  ],
  "retired": [],
- "generated_at": "2026-09-08T11:39:43+00:00"
+ "generated_at": "2026-09-08T12:42:03+00:00"
 }
